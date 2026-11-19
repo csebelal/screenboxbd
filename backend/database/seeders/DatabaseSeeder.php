@@ -15,6 +15,9 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             CategorySeeder::class,
             SampleDataSeeder::class,
+            BanglaOttSeeder::class,
+            DynamicPlatformSeeder::class,
+            AdPlacementSeeder::class,
         ]);
     }
 }
