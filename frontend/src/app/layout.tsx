@@ -24,6 +24,11 @@ export const metadata: Metadata = {
   title: "ScreenBoxBD - Premium BDIX Cinema & Live TV Streaming",
   description:
     "ScreenBoxBD is Bangladesh's premier OTT streaming platform for watching your favorite blockbusters, TV shows, and bufferless 1080p Live TV channels on demand with BDIX ultra speed.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
