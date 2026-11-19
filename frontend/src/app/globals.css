@@ -1,0 +1,373 @@
+@import "tailwindcss";
+
+:root {
+  /* Streamit Cinematic Dark Palette */
+  --bg-main: #0B0C0E;
+  --bg-surface: #111318;
+  --bg-surface-elevated: #161820;
+  --bg-surface-card: #181A22;
+  --bg-surface-hover: #1F222C;
+
+  /* Primary Brand Accents */
+  --brand-red: #E50000;
+  --brand-red-hover: #FF1A1A;
+  --brand-red-glow: rgba(229, 0, 0, 0.35);
+  --brand-crimson: #B81D24;
+
+  /* Accent Tones */
+  --accent-gold: #F5C518;
+  --accent-emerald: #10B981;
+  --accent-blue: #3B82F6;
+
+  /* Text & Contrast Hierarchy */
+  --text-primary: #FFFFFF;
+  --text-secondary: #9EA3B0;
+  --text-muted: #666C7A;
+  --text-subtle: #454955;
+
+  /* Subtle Borders & Dividers */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.18);
+  --border-active: rgba(229, 0, 0, 0.5);
+
+  /* Shadows & Depth */
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 30px rgba(229, 0, 0, 0.25);
+  --shadow-elevated: 0 20px 40px -15px rgba(0, 0, 0, 0.8);
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Streamit Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0C0E;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #232630;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #363A48;
+}
+
+/* Hide scrollbar utility for clean horizontal snap rails */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Streamit Glassmorphic Container */
+.streamit-glass {
+  background: rgba(17, 19, 24, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ScreenBox & Streamit Standard & Hover Cards */
+.screenbox-card,
+.streamit-card {
+  background-color: var(--bg-surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.875rem;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.screenbox-card:hover,
+.streamit-card:hover {
+  border-color: var(--border-hover);
+  background-color: var(--bg-surface-hover);
+  box-shadow: var(--shadow-card);
+}
+
+/* Interactive Card with Red Hover Glow */
+.screenbox-card-glow,
+.streamit-card-glow {
+  position: relative;
+  background-color: var(--bg-surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.875rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.screenbox-card-glow:hover,
+.streamit-card-glow:hover {
+  border-color: var(--brand-red-glow);
+  box-shadow: 0 12px 35px -10px rgba(0, 0, 0, 0.8), 0 0 25px -5px var(--brand-red-glow);
+  transform: translateY(-2px);
+}
+
+/* Pill Navigation & Tabs */
+.nav-pill {
+  background: #0D0E12;
+  border: 1px solid var(--border-subtle);
+  border-radius: 9999px;
+  padding: 0.5rem 1.15rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.nav-pill:hover {
+  color: #FFFFFF;
+  border-color: var(--border-hover);
+  background: #161820;
+}
+
+.nav-pill.active {
+  background: #1C1F2A;
+  color: #FFFFFF;
+  border-color: rgba(229, 0, 0, 0.4);
+  box-shadow: 0 0 15px rgba(229, 0, 0, 0.15);
+}
+
+/* Bulletproof player container */
+.artplayer-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 380px;
+  background-color: #000;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+}
+
+@media (min-width: 768px) {
+  .artplayer-wrapper {
+    min-height: 480px;
+  }
+}
+
+.artplayer-app {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #000;
+}
+
+/* Pulse animation for Live indicator */
+@keyframes pulse-live {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+.live-pulse {
+  animation: pulse-live 1.8s infinite ease-in-out;
+}
+
+/* High-Grade Red CTA Buttons */
+.btn-screenbox-red,
+.btn-streamit-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #E50000 0%, #C40000 100%);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.75rem 1.6rem;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(229, 0, 0, 0.35);
+}
+
+.btn-screenbox-red:hover,
+.btn-streamit-primary:hover {
+  background: linear-gradient(135deg, #FF1A1A 0%, #E50000 100%);
+  box-shadow: 0 6px 25px rgba(229, 0, 0, 0.55);
+  transform: translateY(-1px);
+}
+
+.btn-screenbox-red:active,
+.btn-streamit-primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary Dark Button */
+.btn-screenbox-dark,
+.btn-streamit-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #15171F;
+  color: #E2E4E9;
+  border: 1px solid var(--border-subtle);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.625rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-screenbox-dark:hover,
+.btn-streamit-secondary:hover {
+  background-color: #1E212B;
+  border-color: var(--border-hover);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* Ghost / Icon Action Button */
+.btn-streamit-icon {
+  width: 2.625rem;
+  height: 2.625rem;
+  border-radius: 0.625rem;
+  background: #14161E;
+  border: 1px solid var(--border-subtle);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-streamit-icon:hover {
+  background: #1D202A;
+  border-color: var(--border-hover);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+
+/* Top-10 Rank Number (Streamit 3D Cinematic Style) */
+.rank-number-text {
+  font-family: "Space Grotesk", Impact, "Arial Black", sans-serif;
+  font-size: 6rem;
+  line-height: 0.85;
+  font-weight: 900;
+  color: #0B0C0E;
+  -webkit-text-stroke: 3px #333846;
+  text-shadow: 3px 3px 12px rgba(0, 0, 0, 0.95);
+  user-select: none;
+  letter-spacing: -0.06em;
+}
+
+@media (min-width: 640px) {
+  .rank-number-text {
+    font-size: 8rem;
+    -webkit-text-stroke: 4px #454B5E;
+  }
+}
+
+/* Streamit Badge Styles */
+.badge-streamit-hd {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+}
+
+.badge-streamit-4k {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, rgba(229, 0, 0, 0.3) 0%, rgba(184, 29, 36, 0.5) 100%);
+  color: #FF4D4D;
+  border: 1px solid rgba(229, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+}
+
+.badge-streamit-live {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  background: #E50000;
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 0 12px rgba(229, 0, 0, 0.5);
+}
+
+/* Subtle Shimmer for Skeleton States */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #15171F 25%, #20232E 50%, #15171F 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+}
+
+/* UI/UX Pro Max Accessibility & Interaction Polish */
+:focus-visible {
+  outline: 2px solid var(--brand-red);
+  outline-offset: 2px;
+}
+
+.card-cinematic-glow {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+}
+
+.card-cinematic-glow:hover {
+  transform: scale(1.03);
+  border-color: rgba(229, 0, 0, 0.55);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.9), 0 0 20px -3px rgba(229, 0, 0, 0.3);
+}
+
+.btn-tactile {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-tactile:active {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

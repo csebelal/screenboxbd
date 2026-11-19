@@ -1,0 +1,321 @@
+"use client";
+
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import Link from "next/link";
+import { Movie } from "@/types";
+import { Play, Tv, Star, Clock, ChevronLeft, ChevronRight, Flame } from "lucide-react";
+import { optimizeTmdbImage } from "@/lib/imageUtils";
+
+interface HeroSlide {
+  id: number;
+  title: string;
+  tagline: string;
+  overview: string;
+  rating: number;
+  year: string;
+  duration: string;
+  badge: string;
+  backdropUrl: string;
+  posterUrl: string;
+  genres: string[];
+  href: string;
+}
+
+interface HeroMontageProps {
+  movies?: Movie[];
+  posters?: string[];
+}
+
+export default function HeroMontage({ movies = [] }: HeroMontageProps) {
+  // Convert real trending movies from database into cinematic slides
+  const slides: HeroSlide[] = useMemo(() => {
+    if (movies && movies.length > 0) {
+      return movies.slice(0, 8).map((m, idx) => {
+        const is2026 = m.release_year === "2026" || (m.release_date && m.release_date.startsWith("2026"));
+        const tagPrefix = is2026 ? "2026 TRENDING" : "TRENDING";
+
+        return {
+          id: m.id,
+          title: m.title,
+          tagline: Array.isArray(m.genres) && m.genres.length > 0 
+            ? `${tagPrefix} #${idx + 1} • ${m.genres.slice(0, 2).join(" & ")}`
+            : `${tagPrefix} #${idx + 1} • 4K Blockbuster`,
+          overview:
+            m.overview ||
+            "Experience breathtaking cinematic suspense, stellar visuals, and immersive Dolby surround sound in ultra high definition.",
+          rating: m.rating ? Number(m.rating) : 8.6,
+          year: String(m.release_year || (is2026 ? "2026" : "2024")),
+          duration: m.duration_minutes
+            ? `${Math.floor(m.duration_minutes / 60)}h ${m.duration_minutes % 60}m`
+            : "2h 15m",
+          badge: idx === 0 ? "4K ULTRA HD" : idx === 1 ? "IMAX ENHANCED" : "DOLBY VISION",
+          backdropUrl: optimizeTmdbImage(
+            m.backdrop_url || m.poster_url || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1920&q=80",
+            "backdrop"
+          ),
+          posterUrl: optimizeTmdbImage(m.poster_url || m.backdrop_url || "", "thumbnail"),
+          genres: Array.isArray(m.genres) ? m.genres : ["Cinema", "Action"],
+          href: `/movies/${m.slug}`,
+        };
+      });
+    }
+
+    // High quality fallback slides if movies array is still loading
+    return [
+      {
+        id: 1,
+        title: "Interstellar",
+        tagline: "Trending #1 • Sci-Fi & Adventure",
+        overview:
+          "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival across infinite dimensions.",
+        rating: 8.7,
+        year: "2014",
+        duration: "2h 49m",
+        badge: "4K ULTRA HD",
+        backdropUrl: "https://image.tmdb.org/t/p/original/psTMZj8gvsfYVfvd7FZCHH4xL6P.jpg",
+        posterUrl: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+        genres: ["Adventure", "Sci-Fi"],
+        href: "/movies/interstellar",
+      },
+    ];
+  }, [movies]);
+
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<"next" | "prev">("next");
+  const [isHovered, setIsHovered] = useState(false);
+  const slideCount = slides.length;
+
+  const nextSlide = useCallback(() => {
+    if (slideCount <= 1) return;
+    setSlideDirection("next");
+    setActiveSlide((prev) => (prev + 1) % slideCount);
+  }, [slideCount]);
+
+  const prevSlide = useCallback(() => {
+    if (slideCount <= 1) return;
+    setSlideDirection("prev");
+    setActiveSlide((prev) => (prev - 1 + slideCount) % slideCount);
+  }, [slideCount]);
+
+  // Auto advance slides every 7 seconds when not hovered
+  useEffect(() => {
+    if (isHovered || slideCount <= 1) return;
+    const timer = setInterval(nextSlide, 7000);
+    return () => clearInterval(timer);
+  }, [nextSlide, isHovered, slideCount]);
+
+  // Keyboard left / right arrow navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prevSlide();
+      if (e.key === "ArrowRight") nextSlide();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [nextSlide, prevSlide]);
+
+  const current = slides[activeSlide] || slides[0];
+
+  return (
+    <div
+      className="relative w-full min-h-[580px] sm:min-h-[640px] lg:min-h-[720px] flex items-center overflow-hidden bg-[#07080B] select-none"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* ===================================================================== */}
+      {/* 1. CINEMATIC SLIDING BACKDROPS WITH HORIZONTAL SLIDE & KEN BURNS ZOOM  */}
+      {/* ===================================================================== */}
+      {slides.map((slide, index) => {
+        const isActive = index === activeSlide;
+        const isPrev = (activeSlide - 1 + slideCount) % slideCount === index;
+
+        return (
+          <div
+            key={slide.id + "-" + slide.title}
+            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+              isActive
+                ? "opacity-100 z-10 translate-x-0 scale-100"
+                : isPrev
+                ? "opacity-0 z-0 -translate-x-12 scale-105 pointer-events-none"
+                : "opacity-0 z-0 translate-x-12 scale-105 pointer-events-none"
+            }`}
+          >
+            {/* Backdrop Image with Slow Ken-Burns Camera Zoom & Vivid Highlighting */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={slide.backdropUrl}
+              alt={slide.title}
+              className={`w-full h-full object-cover object-center filter brightness-[0.92] contrast-[1.06] transition-transform duration-[7000ms] ease-out ${
+                isActive ? "scale-105" : "scale-100"
+              }`}
+            />
+          </div>
+        );
+      })}
+
+      {/* Cinematic Vignettes: Left gradient for text legibility, Bottom gradient for section blend */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0B0C0E] via-[#0B0C0E]/25 to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0B0C0E]/95 via-[#0B0C0E]/55 to-transparent max-w-3xl z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(229,0,0,0.1)_0%,_transparent_70%)] z-10 pointer-events-none" />
+
+      {/* Top Banner Accent Line */}
+      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#E50000] to-transparent opacity-80 z-20 pointer-events-none" />
+
+      {/* ===================================================================== */}
+      {/* 2. DYNAMIC CONTENT CONTAINER (ANIMATES IN ON SLIDE CHANGE)            */}
+      {/* ===================================================================== */}
+      <div className="relative z-20 w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14 py-16 sm:py-24">
+        <div key={current.id} className="max-w-2xl space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-left-6 duration-700 ease-out">
+          {/* Top Badges */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            <span className="badge-streamit-4k font-mono shadow-md shadow-red-950/40">
+              {current.badge}
+            </span>
+
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md border border-amber-500/30 text-amber-300 text-xs font-bold shadow-sm">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              <span>{current.rating.toFixed(1)} IMDb</span>
+            </div>
+
+            <span className="text-xs font-semibold text-[#E2E4E9] bg-white/10 backdrop-blur-md px-2.5 py-0.5 rounded-md">
+              {current.year}
+            </span>
+
+            <span className="text-xs font-semibold text-[#C2C6D1] flex items-center gap-1 bg-black/40 backdrop-blur-md px-2.5 py-0.5 rounded-md">
+              <Clock className="w-3 h-3 text-[#9EA3B0]" />
+              {current.duration}
+            </span>
+          </div>
+
+          {/* Title & Tagline */}
+          <div className="space-y-1">
+            <p className="text-xs sm:text-sm font-black tracking-widest uppercase text-[#E50000] flex items-center gap-1.5 font-['Space_Grotesk']">
+              <Flame className="w-3.5 h-3.5 fill-red-500" />
+              <span>{current.tagline}</span>
+            </p>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
+              {current.title}
+            </h1>
+          </div>
+
+          {/* Synopsis */}
+          <p className="text-xs sm:text-sm md:text-base text-[#D0D4DF] leading-relaxed line-clamp-3 max-w-xl font-normal drop-shadow">
+            {current.overview}
+          </p>
+
+          {/* Action CTAs */}
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
+            <Link
+              href={current.href}
+              className="btn-screenbox-red px-8 py-3.5 text-sm sm:text-base rounded-xl flex items-center gap-2.5 shadow-xl shadow-red-950/60 hover:scale-105 transition-all duration-300 cursor-pointer"
+            >
+              <div className="w-6 h-6 rounded-full bg-white text-[#E50000] flex items-center justify-center">
+                <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+              </div>
+              <span className="font-extrabold">Watch Now</span>
+            </Link>
+
+            <Link
+              href="/tv"
+              className="btn-screenbox-dark px-6 py-3.5 text-sm sm:text-base rounded-xl flex items-center gap-2 border-white/10 hover:border-red-500/40 hover:scale-105 transition-all duration-300 cursor-pointer"
+            >
+              <Tv className="w-4 h-4 text-red-500" />
+              <span>Explore Live TV</span>
+            </Link>
+          </div>
+
+          {/* Platform Metrics Highlights */}
+          <div className="pt-6 border-t border-white/[0.08] grid grid-cols-3 gap-4 max-w-lg">
+            <div>
+              <p className="text-lg sm:text-2xl font-black text-white">218+</p>
+              <p className="text-[11px] text-[#9EA3B0] uppercase font-semibold">Live Channels</p>
+            </div>
+            <div>
+              <p className="text-lg sm:text-2xl font-black text-white">900+</p>
+              <p className="text-[11px] text-[#9EA3B0] uppercase font-semibold">4K Movies</p>
+            </div>
+            <div>
+              <p className="text-lg sm:text-2xl font-black text-white">0s</p>
+              <p className="text-[11px] text-[#9EA3B0] uppercase font-semibold">Buffer Delay</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===================================================================== */}
+      {/* 3. BOTTOM SLIDE NAVIGATION & THUMBNAIL DOCK                           */}
+      {/* ===================================================================== */}
+      <div className="absolute bottom-6 right-4 sm:right-8 lg:right-12 z-20 flex items-center gap-4">
+        {/* Next Slide Previews / Thumbnails (Laptop & Desktop) */}
+        <div className="hidden xl:flex items-center gap-2 bg-black/60 backdrop-blur-md p-1.5 rounded-2xl border border-white/10">
+          {slides.map((slide, idx) => {
+            const isSlideActive = idx === activeSlide;
+            return (
+              <button
+                key={slide.id}
+                type="button"
+                onClick={() => {
+                  setSlideDirection(idx > activeSlide ? "next" : "prev");
+                  setActiveSlide(idx);
+                }}
+                className={`relative w-14 h-9 rounded-lg overflow-hidden border transition-all duration-300 cursor-pointer ${
+                  isSlideActive
+                    ? "border-[#E50000] ring-2 ring-red-500/60 scale-105 opacity-100"
+                    : "border-white/15 opacity-50 hover:opacity-100 hover:border-white/40"
+                }`}
+                title={`Jump to ${slide.title}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={slide.posterUrl || slide.backdropUrl}
+                  alt={slide.title}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Slide Indicators & Navigation Controls */}
+        <div className="flex items-center gap-2 bg-black/75 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/10 shadow-2xl">
+          {/* Indicators */}
+          <div className="flex items-center gap-1.5 mr-1">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => {
+                  setSlideDirection(i > activeSlide ? "next" : "prev");
+                  setActiveSlide(i);
+                }}
+                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                  i === activeSlide ? "w-6 bg-[#E50000]" : "w-1.5 bg-white/30 hover:bg-white/60"
+                }`}
+                title={`Slide ${i + 1}`}
+              />
+            ))}
+          </div>
+
+          {/* Prev / Next Buttons */}
+          <button
+            type="button"
+            onClick={prevSlide}
+            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-[#E50000] text-white flex items-center justify-center transition cursor-pointer"
+            title="Previous Slide"
+          >
+            <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+          </button>
+
+          <button
+            type="button"
+            onClick={nextSlide}
+            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-[#E50000] text-white flex items-center justify-center transition cursor-pointer"
+            title="Next Slide"
+          >
+            <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,18 @@
+# Monorepo Root .gitignore
+.env
+.env.*
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+backend/vendor/
+backend/.env
+backend/storage/*.key
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/storage/logs/*
+backend/public/storage
+backend/public/hot
+.phpunit.result.cache
+*.log
