@@ -1,25 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Space_Grotesk } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import AnnouncementRibbon from "@/components/layout/AnnouncementRibbon";
 import Footer from "@/components/layout/Footer";
 import BackToTop from "@/components/layout/BackToTop";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import "./globals.css";
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  display: "swap",
-  variable: "--font-manrope",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  display: "swap",
-  variable: "--font-space-grotesk",
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -41,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${manrope.variable} ${spaceGrotesk.variable}`}>
+    <html lang="en" className="dark">
       <body className="min-h-screen bg-[#0B0C0E] text-white flex flex-col selection:bg-[#E50000] selection:text-white font-sans antialiased overflow-x-hidden">
         <AnnouncementRibbon />
         <Navbar />
