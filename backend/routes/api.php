@@ -37,8 +37,9 @@ Route::get('/stats/live-users', function () {
 // Monetization & Ads
 Route::get('/ads/slots', [AdController::class, 'getSlots'])->name('api.ads.slots');
 
-// CORS HLS Stream Proxy
+// CORS HLS & Video Stream Proxy
 Route::match(['GET', 'OPTIONS'], '/stream/proxy', [StreamProxyController::class, 'proxy'])->name('api.stream.proxy');
+Route::match(['GET', 'OPTIONS'], '/stream/drive/{id}', [StreamProxyController::class, 'drive'])->name('api.stream.drive');
 
 // Aggregated Home Endpoint
 Route::get('/home', [HomeController::class, 'index'])->name('api.home');

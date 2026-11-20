@@ -57,8 +57,8 @@
                 <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(245,158,11,0.15); display: flex; align-items: center; justify-content: center; color: #f59e0b; margin-bottom: 8px;">
                     <x-filament::icon icon="heroicon-o-film" style="width: 20px; height: 20px;" />
                 </div>
-                <span style="font-size: 0.825rem; font-weight: 600; color: #f4f4f5;">TMDB Movies</span>
-                <span style="font-size: 0.7rem; color: #a1a1aa;">1-Click Auto Sync</span>
+                <span style="font-size: 0.825rem; font-weight: 600; color: #f4f4f5;">Movies</span>
+                <span style="font-size: 0.7rem; color: #a1a1aa;">Manual Catalog</span>
             </a>
 
             <a href="{{ url('/admin/ad-placements') }}" style="display: flex; flex-direction: column; align-items: center; padding: 14px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); text-decoration: none; transition: all 0.2s;">

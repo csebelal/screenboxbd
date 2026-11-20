@@ -68,36 +68,37 @@
 
     {{-- 2. Automation Engines Section --}}
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px;">
-        {{-- Card 1: TMDB Movie Engine --}}
+        {{-- Card 1: Bangla Natok & Telefilm Studio (Manual Entry) --}}
         <x-filament::section>
             <x-slot name="heading">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="color: #f59e0b;">
-                        <x-filament::icon icon="heroicon-o-film" style="width: 20px; height: 20px;" />
+                    <div style="color: #ec4899;">
+                        <x-filament::icon icon="heroicon-o-sparkles" style="width: 20px; height: 20px;" />
                     </div>
-                    <span style="font-weight: 700; font-size: 1.05rem;">TMDB Movies & Cinema Engine</span>
+                    <span style="font-weight: 700; font-size: 1.05rem;">Bangla Natok & Cinema Studio</span>
                 </div>
             </x-slot>
             <p style="font-size: 0.85rem; color: #a1a1aa; line-height: 1.4; margin-bottom: 16px;">
-                Fetch official metadata, 4K posters, backdrops, cast, and trailers. Automatically attaches VidSrc, SuperEmbed, AutoEmbed, and 2Embed streaming iframes.
+                Quickly add single Bengali dramas, Eid specials, or YouTube telefilms. Auto-fetches YouTube thumbnails and sets up embed/HLS stream.
             </p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <x-filament::button
-                    wire:click="mountAction('importMovie')"
-                    icon="heroicon-m-magnifying-glass"
-                    color="primary"
+                    wire:click="mountAction('addNatok')"
+                    icon="heroicon-m-plus"
+                    color="warning"
                     size="sm"
                 >
-                    Search & Import Movie
+                    + Add Single Natok / Cinema
                 </x-filament::button>
 
                 <x-filament::button
-                    wire:click="mountAction('syncTrendingMovies')"
-                    icon="heroicon-m-fire"
-                    color="danger"
+                    tag="a"
+                    href="{{ url('/admin/movies') }}"
+                    icon="heroicon-m-queue-list"
+                    color="gray"
                     size="sm"
                 >
-                    Sync Trending Movies
+                    Manage Movies & Natok
                 </x-filament::button>
             </div>
         </x-filament::section>
@@ -137,92 +138,32 @@
             </div>
         </x-filament::section>
 
-        {{-- Card 3: Bangla Natok & Telefilm Studio --}}
+        {{-- Card 3: Live Channels Management --}}
         <x-filament::section>
             <x-slot name="heading">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="color: #ec4899;">
-                        <x-filament::icon icon="heroicon-o-sparkles" style="width: 20px; height: 20px;" />
+                    <div style="color: #3b82f6;">
+                        <x-filament::icon icon="heroicon-o-tv" style="width: 20px; height: 20px;" />
                     </div>
-                    <span style="font-weight: 700; font-size: 1.05rem;">Bangla Natok & OTT Studio</span>
+                    <span style="font-weight: 700; font-size: 1.05rem;">Live TV Channels</span>
                 </div>
             </x-slot>
             <p style="font-size: 0.85rem; color: #a1a1aa; line-height: 1.4; margin-bottom: 16px;">
-                Quickly add single Bengali dramas, Eid specials, or YouTube telefilms. Auto-fetches YouTube thumbnails and sets up embed/HLS stream.
+                Manage 200+ Live IPTV channels, BDIX feeds, category assignments, and multi-server fallback streams.
             </p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <x-filament::button
-                    wire:click="mountAction('addNatok')"
-                    icon="heroicon-m-plus"
-                    color="warning"
-                    size="sm"
-                >
-                    + Add Single Natok
-                </x-filament::button>
-
                 <x-filament::button
                     tag="a"
-                    href="{{ url('/admin/movies?tableFilters[genres][value]=Bangla+Natok') }}"
+                    href="{{ url('/admin/channels') }}"
                     icon="heroicon-m-queue-list"
-                    color="gray"
+                    color="primary"
                     size="sm"
                 >
-                    View All Natok
+                    Manage Channels
                 </x-filament::button>
             </div>
         </x-filament::section>
-
-        {{-- Card 4: BDIX FTP Local ISP Scanner --}}
-        <x-filament::section>
-            <x-slot name="heading">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="color: #a855f7;">
-                        <x-filament::icon icon="heroicon-o-bolt" style="width: 20px; height: 20px;" />
-                    </div>
-                    <span style="font-weight: 700; font-size: 1.05rem;">BDIX FTP Open Directory Scanner</span>
-                </div>
-            </x-slot>
-            <p style="font-size: 0.85rem; color: #a1a1aa; line-height: 1.4; margin-bottom: 16px;">
-                Crawl local ISP FTP servers (e.g. CircleFTP, SamOnline, StarFTP). Cleans release filenames, matches with TMDB, and links Server 1 (BDIX Ultra-Speed).
-            </p>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <x-filament::button
-                    wire:click="mountAction('scanBdix')"
-                    icon="heroicon-m-bolt"
-                    color="success"
-                    size="sm"
-                >
-                    Scan FTP Directory
-                </x-filament::button>
-            </div>
-        </x-filament::section>
-
-        {{-- Card 5: YTS Torrent & Magnet Engine --}}
-        <x-filament::section>
-            <x-slot name="heading">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="color: #0ea5e9;">
-                        <x-filament::icon icon="heroicon-o-arrow-down-tray" style="width: 20px; height: 20px;" />
-                    </div>
-                    <span style="font-weight: 700; font-size: 1.05rem;">YTS Torrent & Magnet Engine</span>
-                </div>
-            </x-slot>
-            <p style="font-size: 0.85rem; color: #a1a1aa; line-height: 1.4; margin-bottom: 16px;">
-                Ingest offline 720p, 1080p, and 2160p releases with tracker-enhanced magnet links and seed health into the Download Gateway.
-            </p>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <x-filament::button
-                    wire:click="mountAction('syncYts')"
-                    icon="heroicon-m-arrow-down-tray"
-                    color="gray"
-                    size="sm"
-                >
-                    Sync Torrent Magnets
-                </x-filament::button>
-            </div>
-        </x-filament::section>
-
-        {{-- Card 6: Quick Shortcuts --}}
+    </div>
         <x-filament::section>
             <x-slot name="heading">
                 <div style="display: flex; align-items: center; gap: 8px;">

@@ -162,9 +162,11 @@ class MovieForm
 
                         Select::make('stream_type')
                             ->options([
-                                'hls' => 'HLS Stream (.m3u8)',
-                                'embed' => 'Embed Iframe URL',
-                                'mp4' => 'Direct MP4 Video',
+                                'hls' => 'HLS Stream (.m3u8 - Native ArtPlayer)',
+                                'mp4' => 'Direct MP4 Video (.mp4 - Native ArtPlayer)',
+                                'drive' => 'Google Drive (ID or Link - 0% Ads)',
+                                'youtube' => 'YouTube Clean Natok / Telefilm (No-Cookie)',
+                                'embed' => 'Custom Embed Iframe',
                             ])
                             ->required()
                             ->default('hls'),
@@ -175,6 +177,7 @@ class MovieForm
 
                         TextInput::make('stream_url')
                             ->label('Stream or Embed URL')
+                            ->helperText('Paste direct .m3u8, .mp4, Google Drive link/ID, or YouTube video link')
                             ->required()
                             ->columnSpan(2),
 

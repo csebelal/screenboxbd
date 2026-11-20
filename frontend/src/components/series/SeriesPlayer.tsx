@@ -114,12 +114,46 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
     streams[selectedServerIndex] || streams[0];
 
   const isBdix = activeStream?.server_name?.toLowerCase().includes("bdix");
-  const isEmbed =
-    activeStream?.stream_type === "embed" ||
-    activeStream?.is_embed ||
-    (activeStream?.stream_url &&
-      !activeStream.stream_url.includes(".m3u8") &&
-      !activeStream.stream_url.includes(".mp4"));
+
+  // Helper to extract clean YouTube embed
+  const getYouTubeEmbedUrl = (url: string): string => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    const videoId = match && match[2].length === 11 ? match[2] : url;
+    return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&controls=1`;
+  };
+
+  // Helper to resolve stream URL (handles Google Drive proxy)
+  const resolveStreamUrl = (stream?: EpisodeStream): string => {
+    if (!stream?.stream_url) return "";
+    const url = stream.stream_url.trim();
+
+    if (stream.stream_type === "drive" || url.includes("drive.google.com")) {
+      const match = url.match(/(?:file\/d\/|id=)([a-zA-Z0-9_-]{25,})/);
+      const fileId = match ? match[1] : url;
+      return `/api/v1/stream/drive/${fileId}`;
+    }
+
+    return stream.proxy_url || url;
+  };
+
+  const isYouTube =
+    activeStream?.stream_type === "youtube" ||
+    activeStream?.stream_url?.includes("youtube.com") ||
+    activeStream?.stream_url?.includes("youtu.be");
+
+  const isNative =
+    !isYouTube &&
+    (activeStream?.stream_type === "hls" ||
+      activeStream?.stream_type === "mp4" ||
+      activeStream?.stream_type === "direct" ||
+      activeStream?.stream_type === "drive" ||
+      (activeStream?.stream_url &&
+        (activeStream.stream_url.includes(".m3u8") ||
+          activeStream.stream_url.includes(".mp4") ||
+          activeStream.stream_url.includes("/api/v1/stream"))));
+
+  const isEmbed = !isYouTube && !isNative;
 
   const handleSelectEpisode = (epNum: number) => {
     setActiveEpisodeNumber(epNum);
@@ -141,7 +175,18 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
       {/* Video Viewport Container */}
       <div className="relative w-full aspect-video rounded-3xl overflow-hidden bg-black border border-white/10 shadow-2xl shadow-black/90">
         {activeStream ? (
-          isEmbed ? (
+          isYouTube ? (
+            <div key={`${activeStream.stream_url}-${reloadKey}`} className="relative w-full h-full">
+              <iframe
+                src={getYouTubeEmbedUrl(activeStream.stream_url)}
+                title={`${series.title} - S${activeSeasonNumber}E${activeEpisodeNumber}`}
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                referrerPolicy="strict-origin-when-cross-origin"
+                className="w-full h-full border-0"
+              />
+            </div>
+          ) : isEmbed ? (
             <div key={`${activeStream.stream_url}-${reloadKey}`} className="relative w-full h-full">
               <iframe
                 src={activeStream.stream_url}
@@ -155,7 +200,7 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
           ) : (
             <div key={`${activeStream.stream_url}-${reloadKey}`} className="w-full h-full">
               <ArtPlayer
-                url={activeStream.stream_url}
+                url={resolveStreamUrl(activeStream)}
                 poster={currentEpisode?.still_url || series.backdrop_url || series.poster_url || undefined}
                 title={`${series.title} - S${activeSeasonNumber}E${activeEpisodeNumber}`}
                 isLive={false}

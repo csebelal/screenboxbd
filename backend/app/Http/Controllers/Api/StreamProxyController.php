@@ -39,18 +39,44 @@ class StreamProxyController extends Controller
         }
 
         try {
-            // Determine if target URL is likely an M3U8 manifest or a binary video segment (.ts / .m4s / .mp4)
+            // Determine if target URL is likely an M3U8 manifest or a binary video segment (.ts / .m4s / .mp4 / drive)
             $isM3u8 = str_contains(strtolower($targetUrl), '.m3u8') || str_contains(strtolower($targetUrl), 'manifest');
 
             if ($isM3u8) {
                 return $this->proxyM3u8Manifest($targetUrl, $clientHeaders);
             }
 
-            return $this->proxyBinarySegment($targetUrl, $clientHeaders);
+            // For MP4, Google Drive, or binary video streams, use Range-supported streaming
+            return $this->proxyVideoWithRange($targetUrl, $clientHeaders, $request);
         } catch (\Throwable $e) {
             Log::error("Stream Proxy Error: {$e->getMessage()}", ['url' => $targetUrl]);
             return response()->json(['error' => 'Unable to proxy requested stream.'], 502);
         }
+    }
+
+    /**
+     * Proxy Google Drive video by File ID with Range support.
+     */
+    public function drive(Request $request, string $id)
+    {
+        if ($request->isMethod('OPTIONS')) {
+            return response('', 204)
+                ->header('Access-Control-Allow-Origin', '*')
+                ->header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
+                ->header('Access-Control-Allow-Headers', '*');
+        }
+
+        // Clean ID if passed as full URL
+        if (preg_match('/(?:file\/d\/|id=)([a-zA-Z0-9_-]{25,})/', $id, $m)) {
+            $id = $m[1];
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9_-]{25,}$/', $id)) {
+            return response()->json(['error' => 'Invalid Google Drive File ID.'], 400);
+        }
+
+        $targetUrl = 'https://drive.google.com/uc?id=' . $id . '&export=download';
+        return $this->proxyVideoWithRange($targetUrl, [], $request);
     }
 
     /**
@@ -164,6 +190,63 @@ class StreamProxyController extends Controller
             ->header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
             ->header('Access-Control-Allow-Headers', '*')
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+
+    /**
+     * Stream binary video (.mp4, .ts, Google Drive) with HTTP Range support for seeking.
+     */
+    protected function proxyVideoWithRange(string $targetUrl, array $clientHeaders, Request $request)
+    {
+        // If Google Drive link, extract File ID and rewrite
+        if (str_contains($targetUrl, 'drive.google.com')) {
+            if (preg_match('/(?:file\/d\/|id=)([a-zA-Z0-9_-]{25,})/', $targetUrl, $m)) {
+                $targetUrl = 'https://drive.google.com/uc?id=' . $m[1] . '&export=download';
+            }
+        }
+
+        $range = $request->header('Range');
+        $ch = curl_init($targetUrl);
+
+        curl_setopt_array($ch, [
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_BUFFERSIZE => 256 * 1024,
+            CURLOPT_HEADER => false,
+        ]);
+
+        $curlHeaders = [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept: */*',
+        ];
+        if ($range) {
+            $curlHeaders[] = 'Range: ' . $range;
+        }
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $curlHeaders);
+
+        $responseHeaders = [
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
+            'Access-Control-Allow-Headers' => '*',
+            'Accept-Ranges' => 'bytes',
+            'Content-Type' => 'video/mp4',
+            'Cache-Control' => 'public, max-age=86400',
+        ];
+
+        return new StreamedResponse(function () use ($ch) {
+            curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) {
+                echo $data;
+                if (ob_get_level() > 0) {
+                    ob_flush();
+                }
+                flush();
+                return strlen($data);
+            });
+            curl_exec($ch);
+            curl_close($ch);
+        }, $range ? 206 : 200, $responseHeaders);
     }
 
     /**

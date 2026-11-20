@@ -60,22 +60,22 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
       });
     }
 
-    // High quality fallback slides if movies array is still loading
+    // High quality Live TV showcase slide when movie catalog is clean
     return [
       {
         id: 1,
-        title: "Interstellar",
-        tagline: "Trending #1 • Sci-Fi & Adventure",
+        title: "ScreenBoxBD Live TV",
+        tagline: "LIVE STREAMING • 200+ Premium IPTV Channels",
         overview:
-          "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival across infinite dimensions.",
-        rating: 8.7,
-        year: "2014",
-        duration: "2h 49m",
-        badge: "4K ULTRA HD",
-        backdropUrl: "https://image.tmdb.org/t/p/original/psTMZj8gvsfYVfvd7FZCHH4xL6P.jpg",
-        posterUrl: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-        genres: ["Adventure", "Sci-Fi"],
-        href: "/movies/interstellar",
+          "Enjoy 200+ high-speed buffer-free BDIX Live TV channels including Sports, News, Entertainment, and Infotainment with multi-server backup streams.",
+        rating: 9.8,
+        year: "2026",
+        duration: "24/7 Live",
+        badge: "BDIX ULTRA FAST",
+        backdropUrl: "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?auto=format&fit=crop&w=1920&q=80",
+        posterUrl: "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?auto=format&fit=crop&w=600&q=80",
+        genres: ["Live TV", "IPTV", "Sports", "News"],
+        href: "/tv",
       },
     ];
   }, [movies]);
@@ -247,8 +247,8 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
               <p className="text-[9px] sm:text-[11px] text-[#9EA3B0] uppercase font-semibold">Live Channels</p>
             </div>
             <div>
-              <p className="text-base sm:text-2xl font-black text-white">900+</p>
-              <p className="text-[9px] sm:text-[11px] text-[#9EA3B0] uppercase font-semibold">4K Movies</p>
+              <p className="text-base sm:text-2xl font-black text-white">100%</p>
+              <p className="text-[9px] sm:text-[11px] text-[#9EA3B0] uppercase font-semibold">BDIX Speed</p>
             </div>
             <div>
               <p className="text-base sm:text-2xl font-black text-white">0s</p>

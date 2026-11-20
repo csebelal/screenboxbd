@@ -72,37 +72,39 @@ export default async function HomePage() {
       )}
 
       {/* Full-width Movies Presentation Section */}
-      <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14 space-y-10">
-        {/* 4. Top 10 Movies To Watch (Matching Reference Image 1 with bottom-right 3D rank numbers) */}
-        {top10Movies.length > 0 && (
-          <FullWidthMovieRail
-            title="Top 10 Movies To Watch"
-            movies={top10Movies}
-            variant="top10"
-            viewAllLink="/movies"
-          />
-        )}
+      {(top10Movies.length > 0 || featuredPopular.length > 0 || specialsMovies.length > 0) && (
+        <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14 space-y-10">
+          {/* 4. Top 10 Movies To Watch */}
+          {top10Movies.length > 0 && (
+            <FullWidthMovieRail
+              title="Top 10 Movies To Watch"
+              movies={top10Movies}
+              variant="top10"
+              viewAllLink="/movies"
+            />
+          )}
 
-        {/* 5. Popular Movies (Matching Reference Image 1) */}
-        {featuredPopular.length > 0 && (
-          <FullWidthMovieRail
-            title="Popular Movies"
-            movies={featuredPopular}
-            variant="portrait"
-            viewAllLink="/movies?sort=popular"
-          />
-        )}
+          {/* 5. Popular Movies */}
+          {featuredPopular.length > 0 && (
+            <FullWidthMovieRail
+              title="Popular Movies"
+              movies={featuredPopular}
+              variant="portrait"
+              viewAllLink="/movies?sort=popular"
+            />
+          )}
 
-        {/* 6. Specials & Latest Movies (Portrait cards matching Popular Movies) */}
-        {specialsMovies.length > 0 && (
-          <FullWidthMovieRail
-            title="Specials & Latest Movies"
-            movies={specialsMovies}
-            variant="portrait"
-            viewAllLink="/movies?sort=latest"
-          />
-        )}
-      </div>
+          {/* 6. Specials & Latest Movies */}
+          {specialsMovies.length > 0 && (
+            <FullWidthMovieRail
+              title="Specials & Latest Movies"
+              movies={specialsMovies}
+              variant="portrait"
+              viewAllLink="/movies?sort=latest"
+            />
+          )}
+        </div>
+      )}
 
       {/* 7. Explore Our Wide Variety of Categories (Collage Cards) */}
       <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14">

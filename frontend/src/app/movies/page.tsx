@@ -205,15 +205,20 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
           <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 mb-4">
             <Film className="w-8 h-8" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">No Titles Found</h3>
+          <h3 className="text-xl font-bold text-white mb-2">
+            {currentSearch || currentGenre ? "No Titles Found" : "Movie Catalog Is Currently Empty"}
+          </h3>
           <p className="text-sm text-[#9EA3B0] max-w-md mb-6">
-            We couldn&apos;t find any titles matching &ldquo;{currentSearch || currentGenre}&rdquo;. Try another search term or reset filters.
+            {currentSearch || currentGenre
+              ? `We couldn't find any titles matching "${currentSearch || currentGenre}". Try another search term or reset filters.`
+              : "All auto-imported movie titles have been cleared. Browse 200+ buffer-free Live TV channels now."}
           </p>
           <Link
-            href="/movies"
-            className="btn-screenbox-red px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold"
+            href="/tv"
+            className="btn-screenbox-red px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2"
           >
-            Clear All Filters
+            <Tv className="w-4 h-4" />
+            <span>Watch Live TV</span>
           </Link>
         </div>
       )}

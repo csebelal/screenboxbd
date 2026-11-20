@@ -48,7 +48,7 @@ export interface DownloadSource {
 export interface MovieStream {
   id: number;
   server_name: string;
-  stream_type: "hls" | "embed" | "mp4";
+  stream_type: "hls" | "embed" | "mp4" | "drive" | "youtube" | string;
   stream_url: string;
   proxy_url?: string | null;
   quality?: string;

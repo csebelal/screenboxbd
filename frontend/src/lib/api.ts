@@ -164,7 +164,7 @@ export async function getChannels(
 
     if (res.ok) {
       const json = await res.json();
-      if (json.data && json.data.length > 0) {
+      if (json.data && Array.isArray(json.data)) {
         setCached(cacheKey, json, 30000);
         return json;
       }
@@ -262,7 +262,7 @@ export async function getMovies(
 
     if (res.ok) {
       const json = await res.json();
-      if (json.data && json.data.length > 0) {
+      if (json.data && Array.isArray(json.data)) {
         setCached(cacheKey, json, 30000);
         return json;
       }
