@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\AdPlacement;
 use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\Channel;
@@ -27,7 +26,7 @@ class StatsOverviewWidget extends BaseWidget
         $movieCount = Movie::count();
         $featuredMovies = Movie::where('is_featured', true)->count();
         $seriesCount = Series::count();
-        $activeAds = AdPlacement::where('is_active', true)->count();
+        $categoryCount = Category::count();
         $userCount = User::count();
         $totalViews = Movie::sum('views') + BlogPost::sum('views');
 
@@ -50,9 +49,9 @@ class StatsOverviewWidget extends BaseWidget
                 ->chart([0, 1, 2, $seriesCount])
                 ->color('info'),
 
-            Stat::make('Active Monetization Ads', number_format($activeAds))
-                ->description('Banners, Popunders & Sponsors')
-                ->descriptionIcon('heroicon-m-currency-dollar')
+            Stat::make('Content Categories', number_format($categoryCount))
+                ->description('Genres, OTT & Regional')
+                ->descriptionIcon('heroicon-m-tag')
                 ->color('warning'),
 
             Stat::make('Total Content Views', number_format($totalViews))

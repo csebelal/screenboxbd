@@ -14,34 +14,10 @@ class AdController extends Controller
      */
     public function getSlots(Request $request): JsonResponse
     {
-        $userAgent = strtolower($request->header('User-Agent', ''));
-        $isBot = $this->detectCrawlerBot($userAgent);
-
-        $query = AdPlacement::active();
-
-        if ($isBot) {
-            $query->where('cloaking_mode', '!=', 'humans_only');
-        }
-
-        $placements = $query->get();
-
-        $slots = [];
-        foreach ($placements as $placement) {
-            $slots[$placement->slot_key] = [
-                'id' => $placement->id,
-                'title' => $placement->title,
-                'slot_key' => $placement->slot_key,
-                'ad_type' => $placement->ad_type,
-                'code_content' => $placement->code_content,
-                'banner_image_url' => $placement->banner_image_url,
-                'target_url' => $placement->target_url,
-                'countdown_seconds' => $placement->countdown_seconds ?? 15,
-            ];
-        }
-
+        // All monetization ads and betting slots permanently disabled
         return response()->json([
-            'is_bot' => $isBot,
-            'slots' => $slots,
+            'is_bot' => false,
+            'slots' => (object) [],
         ]);
     }
 

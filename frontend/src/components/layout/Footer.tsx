@@ -1,13 +1,12 @@
 import Link from "next/link";
 import ScreenBoxLogo from "./ScreenBoxLogo";
-import CtaBanner from "./CtaBanner";
 import { ShieldCheck, Wifi, Award } from "lucide-react";
 
 interface FooterProps {
   showCta?: boolean;
 }
 
-export default function Footer({ showCta = true }: FooterProps) {
+export default function Footer({}: FooterProps) {
   const footerSections = [
     {
       title: "Discover",
@@ -51,9 +50,6 @@ export default function Footer({ showCta = true }: FooterProps) {
 
   return (
     <footer className="w-full bg-[#090A0D] border-t border-white/[0.08] pt-4">
-      {/* Reusable CTA Banner */}
-      {showCta && <CtaBanner />}
-
       {/* Main Footer Links & Brand Section */}
       <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14 py-14">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-10">

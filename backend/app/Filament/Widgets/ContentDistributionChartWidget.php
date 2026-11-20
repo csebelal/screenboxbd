@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\AdPlacement;
 use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\Channel;
@@ -25,24 +24,22 @@ class ContentDistributionChartWidget extends ChartWidget
         $series = Series::count();
         $categories = Category::count();
         $blogs = BlogPost::count();
-        $ads = AdPlacement::count();
 
         return [
             'datasets' => [
                 [
                     'label' => 'Total Count',
-                    'data' => [$channels, $movies, $series, $categories, $blogs, $ads],
+                    'data' => [$channels, $movies, $series, $categories, $blogs],
                     'backgroundColor' => [
                         '#10b981', // emerald for channels
                         '#f59e0b', // amber for movies
                         '#3b82f6', // blue for series
                         '#8b5cf6', // purple for categories
                         '#06b6d4', // cyan for blogs
-                        '#ef4444', // red for ads
                     ],
                 ],
             ],
-            'labels' => ['Live Channels', 'Movies', 'TV Series', 'Categories', 'Blog Posts', 'Ad Slots'],
+            'labels' => ['Live Channels', 'Movies', 'TV Series', 'Categories', 'Blog Posts'],
         ];
     }
 

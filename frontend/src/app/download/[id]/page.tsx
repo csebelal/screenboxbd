@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { getAdSlots, getMovieBySlug } from "@/lib/api";
+import { getMovieBySlug } from "@/lib/api";
 import { Movie, DownloadSource } from "@/types";
 import {
   Download,
@@ -42,8 +42,8 @@ export default function DownloadGatewayPage({ params }: DownloadPageProps) {
   const movieId = resolvedParams.id;
 
   const [movie, setMovie] = useState<Movie | null>(null);
-  const [timeLeft, setTimeLeft] = useState<number>(5);
-  const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
+  const [timeLeft] = useState<number>(0);
+  const [isUnlocked] = useState<boolean>(true);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,36 +51,7 @@ export default function DownloadGatewayPage({ params }: DownloadPageProps) {
     getMovieBySlug(movieId).then((m) => {
       if (m) setMovie(m);
     });
-
-    getAdSlots().then((res) => {
-      if (res) {
-        const customSecs = res.slots?.countdown_page?.countdown_seconds;
-        if (customSecs && customSecs > 0) {
-          setTimeLeft(customSecs);
-        }
-      }
-    });
   }, [movieId]);
-
-  useEffect(() => {
-    if (timeLeft <= 0) {
-      setIsUnlocked(true);
-      return;
-    }
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setIsUnlocked(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeLeft]);
 
   // Build dynamic download mirrors
   const mirrors: DisplayMirror[] = [];
