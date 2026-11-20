@@ -43,7 +43,7 @@ class ListMovies extends ListRecords
                         ->helperText('Numeric ID imports directly. Text search matches the closest title on themoviedb.org.'),
                     Toggle::make('auto_attach_embeds')
                         ->label('Auto-Generate Multi-Server Embeds')
-                        ->helperText('Adds VidSrc, SuperEmbed, AutoEmbed, 2Embed, and SmashyStream links automatically if none exist.')
+                        ->helperText('Adds VidLink VIP, Embed.su, and AutoEmbed clean links automatically if none exist.')
                         ->default(true),
                 ])
                 ->action(function (array $data, TmdbService $tmdb): void {

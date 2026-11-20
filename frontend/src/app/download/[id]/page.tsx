@@ -99,7 +99,7 @@ export default function DownloadGatewayPage({ params }: DownloadPageProps) {
       {
         id: "mirror-1",
         name: "Direct Cloud Mirror (1080p Ultra)",
-        url: `https://vidsrc.to/embed/movie/${movie?.tmdb_id || movieId}`,
+        url: `https://vidlink.pro/movie/${movie?.tmdb_id || movieId}`,
         badge: "Fastest • Zero Ads",
         speed: "120 MB/s",
         size: "2.4 GB",
@@ -109,7 +109,7 @@ export default function DownloadGatewayPage({ params }: DownloadPageProps) {
       {
         id: "mirror-2",
         name: "Cyberlocker Cloud Edge (720p Mobile)",
-        url: `https://multiembed.mov/?video_id=${movie?.tmdb_id || movieId}&tmdb=1`,
+        url: `https://embed.su/embed/movie/${movie?.tmdb_id || movieId}`,
         badge: "Cloud Backup",
         speed: "65 MB/s",
         size: "1.1 GB",

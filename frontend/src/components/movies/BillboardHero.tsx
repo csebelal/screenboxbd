@@ -374,7 +374,7 @@ export default function BillboardHero({ items }: BillboardHeroProps) {
             {/* Video Player Frame */}
             <div className="relative w-full aspect-video bg-black flex items-center justify-center">
               <iframe
-                src={`https://vidsrc.to/embed/movie/${trailerMovie.tmdb_id || trailerMovie.id}`}
+                src={`https://vidlink.pro/movie/${trailerMovie.tmdb_id || trailerMovie.id}`}
                 title={`Trailer - ${trailerMovie.title}`}
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

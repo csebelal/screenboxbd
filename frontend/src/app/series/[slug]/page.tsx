@@ -9,6 +9,7 @@ import { getSeriesBySlug } from "@/lib/api";
 import { Movie } from "@/types";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 interface PageProps {
   params: Promise<{

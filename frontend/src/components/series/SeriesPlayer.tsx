@@ -94,10 +94,21 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
     },
   ];
 
-  const streams: EpisodeStream[] =
+  const TOXIC_AD_HOSTS = [
+    "vidsrc.to",
+    "multiembed",
+    "2embed",
+    "smashystream",
+  ];
+
+  const rawStreams: EpisodeStream[] =
     currentEpisode?.streams && currentEpisode.streams.length > 0
       ? currentEpisode.streams
       : defaultEmbedStreams;
+
+  const streams: EpisodeStream[] = rawStreams.filter(
+    (s) => !TOXIC_AD_HOSTS.some((bad) => s.stream_url?.toLowerCase().includes(bad))
+  );
 
   const activeStream: EpisodeStream | undefined =
     streams[selectedServerIndex] || streams[0];

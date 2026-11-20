@@ -51,7 +51,29 @@ export default function MoviePlayer({
       !s.stream_url.includes("akamaized.net/hls/live/2000341")
   );
 
-  const availableStreams = validStreams.length > 0 ? validStreams : streams;
+  // Hard blacklist of known ad-heavy, pop-up, or CAPTCHA-injecting embed hosts
+  const TOXIC_AD_HOSTS = [
+    "vidsrc.to",
+    "multiembed",
+    "2embed",
+    "smashystream",
+  ];
+
+  const safeStreams = (validStreams.length > 0 ? validStreams : streams).filter(
+    (s) => !TOXIC_AD_HOSTS.some((bad) => s.stream_url?.toLowerCase().includes(bad))
+  );
+
+  const availableStreams = safeStreams.length > 0 ? safeStreams : [
+    {
+      id: 9999,
+      server_name: "VidLink VIP (Ad-Free)",
+      stream_type: "embed" as const,
+      stream_url: `https://vidlink.pro/movie/${movieTitle}`,
+      quality: "1080p",
+      priority: 1,
+      is_embed: true,
+    }
+  ];
 
   const [selectedStreamIndex, setSelectedStreamIndex] = useState<number>(0);
   const [reloadKey, setReloadKey] = useState<number>(0);

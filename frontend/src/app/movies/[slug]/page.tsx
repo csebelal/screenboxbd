@@ -10,6 +10,7 @@ import Link from "next/link";
 import { Play, Plus, ThumbsUp, ArrowLeft, Download, Star } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 interface PageProps {
   params: Promise<{
