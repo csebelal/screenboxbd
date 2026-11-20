@@ -87,6 +87,7 @@ export default function MoviePlayer({
               <iframe
                 src={activeStream.stream_url}
                 title={`${movieTitle} - ${activeStream.server_name}`}
+                sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                 referrerPolicy="origin"

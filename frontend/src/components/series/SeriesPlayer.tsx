@@ -53,42 +53,42 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
   const currentEpisode: Episode | undefined =
     episodes.find((e) => e.episode_number === activeEpisodeNumber) || episodes[0];
 
-  // Resolve episode stream servers (VidSrc, SuperEmbed, AutoEmbed, etc.)
+  // Resolve episode stream servers (Clean, fast, ad-free embed sources)
   const tmdbId = series.tmdb_id;
   const defaultEmbedStreams: EpisodeStream[] = [
     {
       id: 2001,
-      server_name: "VidSrc Cloud (1080p)",
+      server_name: "VidLink VIP (Ad-Free)",
       stream_type: "embed",
-      stream_url: `https://vidsrc.to/embed/tv/${tmdbId}/${activeSeasonNumber}/${activeEpisodeNumber}`,
+      stream_url: `https://vidlink.pro/tv/${tmdbId}/${activeSeasonNumber}/${activeEpisodeNumber}`,
       quality: "1080p",
       priority: 10,
       is_embed: true,
     },
     {
       id: 2002,
-      server_name: "SuperEmbed (Multi-Source)",
+      server_name: "Embed.su (Multi-Source)",
       stream_type: "embed",
-      stream_url: `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${activeSeasonNumber}&e=${activeEpisodeNumber}`,
+      stream_url: `https://embed.su/embed/tv/${tmdbId}/${activeSeasonNumber}/${activeEpisodeNumber}`,
       quality: "Auto",
       priority: 20,
       is_embed: true,
     },
     {
       id: 2003,
-      server_name: "AutoEmbed (Fast CDN)",
+      server_name: "VidSrc v2 Clean",
       stream_type: "embed",
-      stream_url: `https://player.autoembed.cc/embed/tv/${tmdbId}/${activeSeasonNumber}/${activeEpisodeNumber}`,
+      stream_url: `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${activeSeasonNumber}/${activeEpisodeNumber}`,
       quality: "1080p",
       priority: 25,
       is_embed: true,
     },
     {
       id: 2004,
-      server_name: "2Embed (HD Stream)",
+      server_name: "AutoEmbed (Fast CDN)",
       stream_type: "embed",
-      stream_url: `https://www.2embed.cc/embedtv/${tmdbId}&s=${activeSeasonNumber}&e=${activeEpisodeNumber}`,
-      quality: "720p",
+      stream_url: `https://player.autoembed.cc/embed/tv/${tmdbId}/${activeSeasonNumber}/${activeEpisodeNumber}`,
+      quality: "1080p",
       priority: 30,
       is_embed: true,
     },
@@ -135,6 +135,7 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
               <iframe
                 src={activeStream.stream_url}
                 title={`${series.title} - S${activeSeasonNumber}E${activeEpisodeNumber}`}
+                sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                 referrerPolicy="origin"
