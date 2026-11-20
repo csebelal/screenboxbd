@@ -135,7 +135,6 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
               <iframe
                 src={activeStream.stream_url}
                 title={`${series.title} - S${activeSeasonNumber}E${activeEpisodeNumber}`}
-                sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                 referrerPolicy="origin"
