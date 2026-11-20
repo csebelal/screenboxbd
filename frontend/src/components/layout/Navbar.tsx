@@ -30,6 +30,16 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -153,31 +163,40 @@ export default function Navbar() {
     return pathname.startsWith(href);
   };
 
+  const isHome = pathname === "/";
+
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-[#0B0C0E]/90 backdrop-blur-xl border-b border-white/[0.08] transition-all">
+      <header
+        className={
+          isHome
+            ? `fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ease-out ${
+                scrolled
+                  ? "bg-[#08090C]/90 backdrop-blur-2xl shadow-[0_10px_35px_rgba(0,0,0,0.8)] border-b border-white/[0.04]"
+                  : "bg-gradient-to-b from-black/80 via-black/25 to-transparent border-none"
+              }`
+            : "sticky top-0 z-50 w-full bg-[#08090C]/90 backdrop-blur-2xl shadow-[0_4px_25px_rgba(0,0,0,0.6)] border-b border-white/[0.05] transition-all"
+        }
+      >
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14 h-20 flex items-center justify-between gap-3 sm:gap-4">
           {/* Brand Logo */}
           <ScreenBoxLogo />
 
           {/* Center Pill Navigation (Desktop & Laptop) */}
-          <nav className="hidden md:flex items-center gap-1 bg-[#121318]/90 border border-white/[0.08] rounded-full p-1.5 shadow-inner">
+          <nav className="hidden md:flex items-center gap-1 bg-[#101217]/70 backdrop-blur-2xl border border-white/[0.08] rounded-full p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.06)]">
             {navLinks.map((link) => {
               const active = isLinkActive(link.href);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative px-4 py-2 rounded-full text-xs lg:text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                  className={`relative px-4 py-2 rounded-full text-xs lg:text-[13px] transition-all duration-200 cursor-pointer ${
                     active
-                      ? "bg-[#1E212B] text-white shadow-md shadow-black/40 border border-white/10"
-                      : "text-[#9EA3B0] hover:text-white hover:bg-white/[0.04]"
+                      ? "bg-gradient-to-r from-red-600/20 via-red-500/25 to-red-600/20 text-white font-bold border border-red-500/40 shadow-[0_0_16px_rgba(229,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.15)]"
+                      : "text-[#A0A5B5] font-medium hover:text-white hover:bg-white/[0.05]"
                   }`}
                 >
                   {link.label}
-                  {active && (
-                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-[#E50000] shadow-[0_0_8px_#E50000]" />
-                  )}
                 </Link>
               );
             })}
@@ -189,12 +208,12 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setSearchModalOpen(true)}
-              className="group flex items-center gap-2 px-3 py-2 rounded-xl bg-[#14161E] border border-white/[0.08] hover:border-white/20 text-[#9EA3B0] hover:text-white transition duration-200 cursor-pointer"
+              className="group flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-[#101217]/70 hover:bg-white/[0.07] border border-white/[0.08] hover:border-white/20 text-[#A0A5B5] hover:text-white backdrop-blur-xl transition-all duration-300 cursor-pointer shadow-sm"
               title="Search catalog (Ctrl + K)"
             >
-              <Search className="w-4 h-4 text-[#9EA3B0] group-hover:text-red-500 transition-colors" />
-              <span className="hidden xl:inline text-xs text-[#666C7A]">Search movies, TV...</span>
-              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-[#666C7A] bg-black/40 border border-white/[0.08] rounded">
+              <Search className="w-4 h-4 text-[#A0A5B5] group-hover:text-red-500 transition-colors" />
+              <span className="hidden xl:inline text-xs text-[#707684]">Search movies, TV...</span>
+              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-[#707684] bg-white/[0.04] border border-white/[0.08] rounded-md">
                 ⌘K
               </kbd>
             </button>
@@ -207,15 +226,15 @@ export default function Navbar() {
                   setNotificationsOpen(!notificationsOpen);
                   setProfileOpen(false);
                 }}
-                className={`relative w-10 h-10 rounded-xl border flex items-center justify-center transition cursor-pointer ${
+                className={`relative w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300 cursor-pointer backdrop-blur-xl ${
                   notificationsOpen
-                    ? "bg-[#1E212B] border-red-500/50 text-white"
-                    : "bg-[#14161E] border-white/[0.08] hover:border-white/20 text-[#9EA3B0] hover:text-white"
+                    ? "bg-white/[0.1] border-red-500/60 text-white shadow-[0_0_15px_rgba(229,0,0,0.3)]"
+                    : "bg-[#101217]/70 border-white/[0.08] hover:border-white/20 text-[#A0A5B5] hover:text-white hover:bg-white/[0.07]"
                 }`}
                 title="Notifications"
               >
                 <Bell className="w-4 h-4" />
-                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#E50000] ring-2 ring-[#0B0C0E]" />
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#E50000] ring-2 ring-[#0B0C0E] shadow-[0_0_8px_#E50000]" />
               </button>
 
               {/* Notifications Dropdown Panel */}
@@ -281,13 +300,17 @@ export default function Navbar() {
                   setProfileOpen(!profileOpen);
                   setNotificationsOpen(false);
                 }}
-                className="flex items-center gap-2 p-1 pl-2 pr-2.5 rounded-xl bg-[#14161E] border border-white/[0.08] hover:border-white/20 transition cursor-pointer"
+                className={`flex items-center gap-2 p-1 pl-1.5 pr-3 rounded-full border transition-all duration-300 cursor-pointer backdrop-blur-xl ${
+                  profileOpen
+                    ? "bg-white/[0.1] border-red-500/60 shadow-[0_0_15px_rgba(229,0,0,0.2)]"
+                    : "bg-[#101217]/70 border-white/[0.08] hover:border-white/20 hover:bg-white/[0.07]"
+                }`}
                 title="Account Menu"
               >
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#E50000] to-amber-500 flex items-center justify-center text-white text-xs font-bold shadow-md">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#E50000] via-red-600 to-amber-500 flex items-center justify-center text-white text-[11px] font-black shadow-md shadow-red-950/60">
                   V
                 </div>
-                <span className="hidden sm:inline text-xs font-bold text-white">VIP User</span>
+                <span className="hidden sm:inline text-xs font-bold text-white tracking-wide">VIP User</span>
               </button>
 
               {/* Profile Dropdown */}
@@ -346,7 +369,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden w-10 h-10 rounded-xl bg-[#14161E] border border-white/[0.08] flex items-center justify-center text-[#9EA3B0] hover:text-white transition cursor-pointer"
+              className="md:hidden w-10 h-10 rounded-full bg-[#101217]/70 border border-white/[0.08] hover:border-white/20 flex items-center justify-center text-[#A0A5B5] hover:text-white transition cursor-pointer backdrop-blur-xl"
               title="Toggle Menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5" />}

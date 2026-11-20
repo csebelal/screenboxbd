@@ -105,6 +105,134 @@ class ContentSyncHub extends Page
                     }
                 }),
 
+            // 2. Automated BDIX Network Crawler (Option A)
+            Action::make('scanBdix')
+                ->label('⚡ Scan BDIX Network')
+                ->icon('heroicon-m-bolt')
+                ->color('info')
+                ->modalHeading('Automated BDIX FTP Scanner')
+                ->modalDescription('Crawl Bangladeshi BDIX FTP open directories, auto-clean release names, and attach 100Mbps bufferless streams as Server 1.')
+                ->form([
+                    Select::make('network_preset')
+                        ->label('BDIX FTP Network')
+                        ->options(array_map(fn ($p) => $p['name'], BdixFtpResolverService::getPresetNetworks()) + ['custom' => '🌐 Enter Custom Open Directory URL'])
+                        ->default('circleftp')
+                        ->required()
+                        ->live(),
+                    TextInput::make('custom_url')
+                        ->label('Custom Directory URL')
+                        ->visible(fn (callable $get) => $get('network_preset') === 'custom')
+                        ->required(fn (callable $get) => $get('network_preset') === 'custom')
+                        ->placeholder('http://10.16.100.244/movies/'),
+                    TextInput::make('limit')
+                        ->label('File Crawl Limit')
+                        ->numeric()
+                        ->default(25),
+                    Toggle::make('auto_import')
+                        ->label('Auto-Import Missing Movies via TMDB')
+                        ->default(true),
+                ])
+                ->action(function (array $data, BdixFtpResolverService $bdix): void {
+                    try {
+                        $preset = $data['network_preset'] ?? 'circleftp';
+                        $limit = (int) ($data['limit'] ?? 25);
+                        $autoImport = !empty($data['auto_import']);
+
+                        if ($preset === 'custom') {
+                            $url = trim($data['custom_url'] ?? '');
+                            if (empty($url)) {
+                                throw new \RuntimeException("Please provide a valid open directory URL.");
+                            }
+                            $files = $bdix->crawlOpenDirectory($url, $limit);
+                            $success = 0;
+                            foreach ($files as $f) {
+                                $parsed = $bdix->parseReleaseFilename($f);
+                                if ($bdix->matchAndAttachMovie($f, $parsed['title'], $autoImport)) {
+                                    $success++;
+                                }
+                            }
+                            $networkName = 'Custom Directory';
+                            $total = count($files);
+                        } else {
+                            $res = $bdix->crawlPreset($preset, $limit, $autoImport);
+                            $networkName = $res['network'] ?? 'BDIX';
+                            $success = $res['success'] ?? 0;
+                            $total = $res['total'] ?? 0;
+                        }
+
+                        Notification::make()
+                            ->title('BDIX Crawl Complete')
+                            ->body("Successfully linked {$success}/{$total} releases from {$networkName} as BDIX Ultra-Speed streams!")
+                            ->success()
+                            ->send();
+                    } catch (\Throwable $e) {
+                        Notification::make()->title('BDIX Scan Error')->body($e->getMessage())->danger()->send();
+                    }
+                }),
+
+            // 3. Debrid 10Gbps Cloud VIP Stream Resolver (Option B)
+            Action::make('resolveDebrid')
+                ->label('🚀 Resolve Debrid Cloud VIP')
+                ->icon('heroicon-m-rocket-launch')
+                ->color('primary')
+                ->modalHeading('Debrid 10Gbps Cloud Stream Resolver')
+                ->modalDescription('Unlock instant, 100% ad-free 4K/1080p BluRay stream from Real-Debrid / TorBox 10Gbps CDN cache.')
+                ->form([
+                    TextInput::make('movie_query')
+                        ->label('Movie Title, IMDb ID (tt...) or TMDB ID')
+                        ->required()
+                        ->placeholder('e.g. Oppenheimer or tt15398776'),
+                    Select::make('quality')
+                        ->label('Preferred Stream Quality')
+                        ->options([
+                            '1080p' => '1080p Full HD (Recommended)',
+                            '4k' => '4K UHD / 2160p BluRay',
+                            '720p' => '720p HD',
+                        ])
+                        ->default('1080p')
+                        ->required(),
+                ])
+                ->action(function (array $data, \App\Services\DebridResolverService $debrid, TmdbService $tmdb): void {
+                    try {
+                        $query = trim($data['movie_query']);
+                        $quality = $data['quality'] ?? '1080p';
+
+                        $movie = null;
+                        if (str_starts_with($query, 'tt')) {
+                            $movie = Movie::where('imdb_id', $query)->first();
+                        } elseif (is_numeric($query)) {
+                            $movie = Movie::where('tmdb_id', (int) $query)->first();
+                        } else {
+                            $movie = Movie::where('title', 'LIKE', "%{$query}%")->first();
+                        }
+
+                        if (!$movie) {
+                            $search = $tmdb->searchMovies($query);
+                            if (empty($search['results'])) {
+                                throw new \RuntimeException("No movie found matching '{$query}'.");
+                            }
+                            $movie = $tmdb->importMovieById($search['results'][0]['id']);
+                        }
+
+                        if (!$movie) {
+                            throw new \RuntimeException("Unable to locate or import target movie.");
+                        }
+
+                        $stream = $debrid->resolveMovieStream($movie, $quality);
+                        if (!$stream) {
+                            throw new \RuntimeException("No pre-cached 10Gbps stream found for this movie. Check Real-Debrid API key in .env.");
+                        }
+
+                        Notification::make()
+                            ->title('Cloud VIP Stream Attached')
+                            ->body("Attached 10Gbps {$stream['quality']} stream to '{$movie->title}' with 0% ads!")
+                            ->success()
+                            ->send();
+                    } catch (\Throwable $e) {
+                        Notification::make()->title('Debrid Resolver Notice')->body($e->getMessage())->warning()->send();
+                    }
+                }),
+
             // 3. Quick Add Bangla Natok
             Action::make('addNatok')
                 ->label('+ Add Bangla Natok')

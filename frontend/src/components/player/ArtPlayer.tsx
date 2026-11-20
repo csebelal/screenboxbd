@@ -42,9 +42,9 @@ export default function ArtPlayer({
       url: url,
       poster: poster || "",
       theme: "#e50914",
-      volume: 0.8,
+      volume: 0.9,
       isLive: isLive,
-      muted: true,
+      muted: false,
       autoplay: true,
       pip: true,
       autoSize: false,
@@ -164,6 +164,19 @@ export default function ArtPlayer({
           }
         },
       },
+    });
+
+    // Ensure audio is fully unmuted on initialization and playback
+    art.on("ready", () => {
+      art.muted = false;
+      art.volume = 0.9;
+    });
+
+    art.on("play", () => {
+      if (art.muted) {
+        art.muted = false;
+        art.volume = 0.9;
+      }
     });
 
     playerInstance.current = art;

@@ -45,6 +45,17 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
   );
   const [selectedServerIndex, setSelectedServerIndex] = useState<number>(0);
   const [reloadKey, setReloadKey] = useState<number>(0);
+  const [failoverNotice, setFailoverNotice] = useState<string | null>(null);
+
+  const handleServerFailover = () => {
+    if (selectedServerIndex < streams.length - 1) {
+      const nextIndex = selectedServerIndex + 1;
+      const nextServer = streams[nextIndex];
+      setSelectedServerIndex(nextIndex);
+      setFailoverNotice(`Server unreachable on your ISP. Auto-switched to ${nextServer.server_name}`);
+      setTimeout(() => setFailoverNotice(null), 5000);
+    }
+  };
 
   const currentSeason: Season | undefined =
     seasons.find((s) => s.season_number === activeSeasonNumber) || seasons[0];
@@ -114,6 +125,7 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
     streams[selectedServerIndex] || streams[0];
 
   const isBdix = activeStream?.server_name?.toLowerCase().includes("bdix");
+  const isCloudVip = activeStream?.server_name?.toLowerCase().includes("cloud vip");
 
   // Helper to extract clean YouTube embed
   const getYouTubeEmbedUrl = (url: string): string => {
@@ -205,6 +217,7 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
                 title={`${series.title} - S${activeSeasonNumber}E${activeEpisodeNumber}`}
                 isLive={false}
                 className="w-full h-full"
+                onFallbackNeeded={() => handleServerFailover()}
               />
             </div>
           )
@@ -212,6 +225,13 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
           <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-[#666C7A]">
             <Film className="w-12 h-12 text-[#454B5E] animate-pulse" />
             <p className="text-sm">Connecting to media stream source...</p>
+          </div>
+        )}
+
+        {/* Failover Toast Notice */}
+        {failoverNotice && (
+          <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-xl bg-amber-500/90 text-black text-xs font-bold shadow-xl backdrop-blur-md flex items-center gap-2 animate-bounce">
+            <span>⚡ {failoverNotice}</span>
           </div>
         )}
 
@@ -227,9 +247,11 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
           <span className="truncate max-w-[180px] sm:max-w-[280px]">
             {currentEpisode?.title || currentEpisode?.name || `Episode ${activeEpisodeNumber}`}
           </span>
-          {isBdix && (
+          {isBdix ? (
             <span className="text-emerald-400 text-[10px] bg-emerald-500/20 px-1.5 py-0.5 rounded">BDIX</span>
-          )}
+          ) : isCloudVip ? (
+            <span className="text-amber-300 text-[10px] bg-amber-500/20 px-1.5 py-0.5 rounded font-bold">Cloud VIP</span>
+          ) : null}
         </div>
       </div>
 
@@ -239,7 +261,7 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
           <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar flex-1">
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#9EA3B0] px-1 shrink-0 uppercase tracking-wider">
               <Server className="w-3.5 h-3.5 text-[#E50000]" />
-              <span>Streams:</span>
+              <span>Servers:</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -252,6 +274,7 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
                     key={stream.id || idx}
                     type="button"
                     onClick={() => setSelectedServerIndex(idx)}
+                    title={stream.server_name || `Server ${idx + 1}`}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
                       isActive
                         ? "bg-[#E50000] text-white shadow-md shadow-red-950/40 ring-1 ring-red-400"
@@ -265,7 +288,12 @@ export default function SeriesPlayer({ series }: SeriesPlayerProps) {
                     ) : (
                       <Globe className="w-3 h-3 text-blue-400" />
                     )}
-                    <span>{stream.server_name || `Server ${idx + 1}`}</span>
+                    <span>Server {idx + 1}</span>
+                    {streamIsBdix && (
+                      <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 uppercase">
+                        BDIX
+                      </span>
+                    )}
                     {stream.quality && (
                       <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/40 text-zinc-300">
                         {stream.quality}

@@ -37,5 +37,14 @@ return [
         'image_base_url' => env('TMDB_IMAGE_BASE_URL', 'https://image.tmdb.org/t/p'),
     ],
 
+    'real_debrid' => [
+        'api_key' => env('REAL_DEBRID_API_KEY'),
+        'timeout' => env('REAL_DEBRID_TIMEOUT', 6),
+    ],
+
+    'torbox' => [
+        'api_key' => env('TORBOX_API_KEY'),
+    ],
+
 
 ];

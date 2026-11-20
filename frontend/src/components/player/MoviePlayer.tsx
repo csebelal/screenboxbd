@@ -27,6 +27,7 @@ import {
   Radio,
   ChevronRight,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 
 interface MoviePlayerProps {
@@ -78,6 +79,7 @@ export default function MoviePlayer({
   const [selectedStreamIndex, setSelectedStreamIndex] = useState<number>(0);
   const [reloadKey, setReloadKey] = useState<number>(0);
   const [reportSent, setReportSent] = useState<boolean>(false);
+  const [failoverNotice, setFailoverNotice] = useState<string | null>(null);
 
   const activeStream: MovieStream | undefined = availableStreams[selectedStreamIndex] || availableStreams[0];
 
@@ -90,7 +92,18 @@ export default function MoviePlayer({
     setTimeout(() => setReportSent(false), 4000);
   };
 
+  const handleServerFailover = () => {
+    if (selectedStreamIndex < availableStreams.length - 1) {
+      const nextIndex = selectedStreamIndex + 1;
+      const nextServer = availableStreams[nextIndex];
+      setSelectedStreamIndex(nextIndex);
+      setFailoverNotice(`Server unreachable on your ISP. Auto-switched to ${nextServer.server_name}`);
+      setTimeout(() => setFailoverNotice(null), 5000);
+    }
+  };
+
   const isBdix = activeStream?.server_name?.toLowerCase().includes("bdix");
+  const isCloudVip = activeStream?.server_name?.toLowerCase().includes("cloud vip");
 
   // Helper to extract clean YouTube embed
   const getYouTubeEmbedUrl = (url: string): string => {
@@ -167,6 +180,7 @@ export default function MoviePlayer({
                 title={movieTitle}
                 isLive={false}
                 className="w-full h-full"
+                onFallbackNeeded={() => handleServerFailover()}
               />
             </div>
           )
@@ -174,6 +188,13 @@ export default function MoviePlayer({
           <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-[#666C7A]">
             <Film className="w-12 h-12 text-[#454B5E] animate-pulse" />
             <p className="text-sm">Connecting to media stream source...</p>
+          </div>
+        )}
+
+        {/* Failover Toast Notice */}
+        {failoverNotice && (
+          <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-xl bg-amber-500/90 text-black text-xs font-bold shadow-xl backdrop-blur-md flex items-center gap-2 animate-bounce">
+            <span>⚡ {failoverNotice}</span>
           </div>
         )}
 
@@ -187,6 +208,11 @@ export default function MoviePlayer({
               <>
                 <Radio className="w-3 h-3 text-emerald-400 live-pulse" />
                 <span className="text-emerald-400">BDIX 10Gbps</span>
+              </>
+            ) : isCloudVip ? (
+              <>
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                <span className="text-amber-300 font-extrabold">Cloud VIP 4K BluRay</span>
               </>
             ) : (
               <>
@@ -220,6 +246,7 @@ export default function MoviePlayer({
                     key={stream.id || idx}
                     type="button"
                     onClick={() => setSelectedStreamIndex(idx)}
+                    title={stream.server_name || `Server ${idx + 1}`}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
                       isActive
                         ? "bg-[#E50000] text-white shadow-md shadow-red-950/40 ring-1 ring-red-400"
@@ -233,7 +260,12 @@ export default function MoviePlayer({
                     ) : (
                       <Globe className="w-3 h-3 text-blue-400" />
                     )}
-                    <span>{stream.server_name || `Server ${idx + 1}`}</span>
+                    <span>Server {idx + 1}</span>
+                    {streamIsBdix && (
+                      <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 uppercase">
+                        BDIX
+                      </span>
+                    )}
                     {stream.quality && (
                       <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/40 text-zinc-300">
                         {stream.quality}

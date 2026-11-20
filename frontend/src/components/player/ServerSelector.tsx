@@ -47,7 +47,7 @@ export default function ServerSelector({
                 }`}
               >
                 <Zap className="w-3 h-3 text-amber-400" />
-                <span>{stream.server_name || `Server ${idx + 1}`}</span>
+                <span>Server {idx + 1}</span>
               </button>
 
               {/* CORS Proxy Alternative Button */}

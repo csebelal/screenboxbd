@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ArrowLeft, Download } from "lucide-react";
 import SeriesPlayer from "@/components/series/SeriesPlayer";
 import CastCarousel from "@/components/movies/CastCarousel";
-import ReviewSection from "@/components/movies/ReviewSection";
 import MetadataSidebar from "@/components/movies/MetadataSidebar";
 import { getSeriesBySlug } from "@/lib/api";
 import { Movie } from "@/types";
@@ -129,20 +128,12 @@ export default async function ShowWatchPage({ params }: PageProps) {
         <SeriesPlayer series={series} />
       </div>
 
-      {/* 2-Column Content Grid: Cast & Reviews (Left) + Metadata Sidebar (Right) */}
+      {/* 2-Column Content Grid: Cast & Crew (Left) + Metadata Sidebar (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column (8 cols = 67%) */}
-        <div className="lg:col-span-8 space-y-8">
+        <div className="lg:col-span-8 space-y-6">
           {/* Cast Carousel */}
           <CastCarousel cast={series.cast} />
-
-          {/* Customer Reviews Section */}
-          <ReviewSection
-            movieTitle={series.title}
-            movieRating={series.rating}
-            movieSlug={series.slug}
-            genres={series.genres}
-          />
         </div>
 
         {/* Right Column (4 cols = 33%) */}

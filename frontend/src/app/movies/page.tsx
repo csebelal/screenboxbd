@@ -48,23 +48,30 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
   const allLatest = latestRes?.data || [];
   const allTopRated = topRatedRes?.data || [];
 
+  // Deduplicate movies across all rails so sections never display identical duplicate cards!
+  const usedIds = new Set<number>();
+
   // 1. Recently Added Movies for Billboard Slider (always showing latest added)
   const heroMovies = allLatest.length >= 6 ? allLatest.slice(0, 6) : allPopular.slice(0, 6);
 
-  // 2. Top 10 Blockbusters
-  const top10Movies = allTopRated.length >= 10 ? allTopRated.slice(0, 10) : allPopular.slice(0, 10);
+  // 2. Top 10 Blockbusters (highest rated)
+  const top10Movies = (allTopRated.length >= 10 ? allTopRated : allPopular).slice(0, 10);
+  top10Movies.forEach((m) => usedIds.add(m.id));
 
-  // 3. Popular Movies (18 movies)
-  const popularMovies = allPopular.slice(0, 18);
+  // 3. Popular Movies (strictly excluding Top 10)
+  const popularMovies = allPopular.filter((m) => !usedIds.has(m.id)).slice(0, 18);
+  popularMovies.forEach((m) => usedIds.add(m.id));
 
   // 4. Upcoming & New Releases (15 movies)
-  const upcomingMovies = allLatest.slice(6, 21);
+  const upcomingMovies = allLatest.filter((m) => !usedIds.has(m.id)).slice(0, 16);
+  upcomingMovies.forEach((m) => usedIds.add(m.id));
 
   // 5. Specials & Latest Movies (Portrait cards with real latest movies)
-  const specialsMovies = allLatest.length >= 21 ? allLatest.slice(12, 28) : allPopular.slice(10, 28);
+  const specialsMovies = allLatest.filter((m) => !usedIds.has(m.id)).slice(0, 16);
+  specialsMovies.forEach((m) => usedIds.add(m.id));
 
   // 6. Movies Recommended For You (18 movies)
-  const recommendedMovies = allTopRated.slice(5, 23);
+  const recommendedMovies = allTopRated.filter((m) => !usedIds.has(m.id)).slice(0, 16);
 
   return (
     <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14 py-4 space-y-10 overflow-x-hidden">

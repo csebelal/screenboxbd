@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { getMovieBySlug } from "@/lib/api";
 import MoviePlayer from "@/components/player/MoviePlayer";
 import CastCarousel from "@/components/movies/CastCarousel";
-import ReviewSection from "@/components/movies/ReviewSection";
 import MetadataSidebar from "@/components/movies/MetadataSidebar";
 import ScreenBoxMovieCard from "@/components/movies/ScreenBoxMovieCard";
 import Link from "next/link";
@@ -138,31 +137,32 @@ export default async function MovieWatchPage({ params }: PageProps) {
         )}
       </div>
 
-      {/* 2-Column Content Grid: Main Content (Left) + Sidebar (Right) */}
+      {/* 2-Column Content Grid: Cast & Recommendations (Left) + Metadata Sidebar (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column (8 cols = 67%) */}
         <div className="lg:col-span-8 space-y-6">
-          {/* 1. Description Card */}
-          <div className="streamit-card p-6 space-y-3">
-            <h3 className="text-base sm:text-lg font-black text-white">
-              Synopsis & Storyline
-            </h3>
-            <p className="text-xs sm:text-sm text-[#9EA3B0] leading-relaxed">
-              {movie.overview ||
-                `Stream ${movie.title} in full 1080p and 4K Ultra HD on ScreenBoxBD. Enjoy high-speed BDIX playback and offline downloads across all supported devices.`}
-            </p>
-          </div>
-
-          {/* 2. Cast Carousel */}
+          {/* Cast & Crew Carousel */}
           <CastCarousel cast={movie.cast} />
 
-          {/* 3. Customer Reviews Section */}
-          <ReviewSection
-            movieTitle={movie.title}
-            movieRating={movie.rating}
-            movieSlug={movie.slug}
-            genres={movie.genres}
-          />
+          {/* More Like This / Recommended Titles */}
+          {relatedMovies.length > 0 && (
+            <div className="streamit-card p-6 space-y-5">
+              <div>
+                <h3 className="text-base sm:text-lg font-black text-white">
+                  More Like This
+                </h3>
+                <p className="text-xs text-[#9EA3B0] mt-0.5">
+                  Recommended movies similar to {movie.title}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {relatedMovies.slice(0, 8).map((m) => (
+                  <ScreenBoxMovieCard key={m.id} movie={m} badgeType="rating" />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Column (4 cols = 33%) */}
@@ -170,26 +170,6 @@ export default async function MovieWatchPage({ params }: PageProps) {
           <MetadataSidebar movie={movie} />
         </div>
       </div>
-
-      {/* More Like This / Recommended Rail */}
-      {relatedMovies.length > 0 && (
-        <section className="space-y-6 pt-6 border-t border-white/[0.08]">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              More Like This
-            </h2>
-            <p className="text-xs text-[#9EA3B0] mt-0.5">
-              Recommended titles based on {movie.title}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-            {relatedMovies.map((m) => (
-              <ScreenBoxMovieCard key={m.id} movie={m} badgeType="rating" />
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 }

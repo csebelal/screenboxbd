@@ -27,27 +27,33 @@ interface HeroMontageProps {
 }
 
 export default function HeroMontage({ movies = [] }: HeroMontageProps) {
-  // Convert real trending movies from database into cinematic slides
+  // Convert real trending blockbusters from database into ultra-premium cinematic slides
   const slides: HeroSlide[] = useMemo(() => {
     if (movies && movies.length > 0) {
       return movies.slice(0, 8).map((m, idx) => {
         const is2026 = m.release_year === "2026" || (m.release_date && m.release_date.startsWith("2026"));
-        const tagPrefix = is2026 ? "2026 TRENDING" : "TRENDING";
+        const tagPrefix = is2026 ? "2026 BLOCKBUSTER" : "TRENDING BLOCKBUSTER";
+
+        // Accurate formatting of real duration (e.g. 181m -> 3h 1m, 145m -> 2h 25m)
+        const durationFormatted = m.duration_minutes && m.duration_minutes > 0
+          ? `${Math.floor(m.duration_minutes / 60)}h ${m.duration_minutes % 60 > 0 ? (m.duration_minutes % 60) + "m" : ""}`
+          : "2h 15m";
+
+        const realYear = m.release_year || (m.release_date ? m.release_date.slice(0, 4) : "2026");
+        const realRating = m.rating ? Math.min(9.8, Math.max(5.0, Number(m.rating))) : 8.2;
 
         return {
           id: m.id,
           title: m.title,
           tagline: Array.isArray(m.genres) && m.genres.length > 0 
             ? `${tagPrefix} #${idx + 1} • ${m.genres.slice(0, 2).join(" & ")}`
-            : `${tagPrefix} #${idx + 1} • 4K Blockbuster`,
+            : `${tagPrefix} #${idx + 1}`,
           overview:
             m.overview ||
             "Experience breathtaking cinematic suspense, stellar visuals, and immersive Dolby surround sound in ultra high definition.",
-          rating: m.rating ? Number(m.rating) : 8.6,
-          year: String(m.release_year || (is2026 ? "2026" : "2024")),
-          duration: m.duration_minutes
-            ? `${Math.floor(m.duration_minutes / 60)}h ${m.duration_minutes % 60}m`
-            : "2h 15m",
+          rating: realRating,
+          year: String(realYear),
+          duration: durationFormatted,
           badge: idx === 0 ? "4K ULTRA HD" : idx === 1 ? "IMAX ENHANCED" : "DOLBY VISION",
           backdropUrl: optimizeTmdbImage(
             m.backdrop_url || m.poster_url || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1920&q=80",
@@ -60,7 +66,7 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
       });
     }
 
-    // High quality Live TV showcase slide when movie catalog is clean
+    // High quality Live TV showcase slide fallback
     return [
       {
         id: 1,
@@ -132,14 +138,14 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
 
   return (
     <div
-      className="relative w-full min-h-[520px] sm:min-h-[640px] lg:min-h-[720px] flex items-center overflow-hidden bg-[#07080B] select-none"
+      className="relative w-full h-[75vh] sm:h-[82vh] lg:h-[88vh] min-h-[620px] max-h-[880px] flex items-center overflow-hidden bg-[#07080B] select-none"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
       {/* ===================================================================== */}
-      {/* 1. CINEMATIC SLIDING BACKDROPS WITH HORIZONTAL SLIDE & KEN BURNS ZOOM  */}
+      {/* 1. CINEMATIC SLIDING BACKDROPS WITH HEADROOM PRESERVATION & FADE       */}
       {/* ===================================================================== */}
       {slides.map((slide, index) => {
         const isActive = index === activeSlide;
@@ -152,17 +158,17 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
               isActive
                 ? "opacity-100 z-10 translate-x-0 scale-100"
                 : isPrev
-                ? "opacity-0 z-0 -translate-x-12 scale-105 pointer-events-none"
-                : "opacity-0 z-0 translate-x-12 scale-105 pointer-events-none"
+                ? "opacity-0 z-0 -translate-x-8 scale-[1.01] pointer-events-none"
+                : "opacity-0 z-0 translate-x-8 scale-[1.01] pointer-events-none"
             }`}
           >
-            {/* Backdrop Image with Slow Ken-Burns Camera Zoom & Vivid Highlighting */}
+            {/* Backdrop Image - Positioned to preserve focal center and headroom */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={slide.backdropUrl}
               alt={slide.title}
-              className={`w-full h-full object-cover object-center filter brightness-[0.92] contrast-[1.06] transition-transform duration-[7000ms] ease-out ${
-                isActive ? "scale-105" : "scale-100"
+              className={`w-full h-full object-cover object-[center_20%] sm:object-[center_15%] filter brightness-[0.94] contrast-[1.05] transition-transform duration-[7000ms] ease-out ${
+                isActive ? "scale-[1.02]" : "scale-100"
               }`}
             />
           </div>
@@ -170,46 +176,50 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
       })}
 
       {/* Cinematic Vignettes: Left gradient for text legibility, Bottom gradient for section blend */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0B0C0E] via-[#0B0C0E]/25 to-transparent z-10 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0B0C0E]/95 via-[#0B0C0E]/55 to-transparent max-w-3xl z-10 pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(229,0,0,0.1)_0%,_transparent_70%)] z-10 pointer-events-none" />
-
-      {/* Top Banner Accent Line */}
-      <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#E50000] to-transparent opacity-80 z-20 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0B0C0E] via-[#0B0C0E]/30 to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#07080B] via-[#07080B]/85 via-45% to-transparent max-w-4xl z-10 pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-44 bg-gradient-to-b from-black/60 via-black/15 to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(229,0,0,0.12)_0%,_transparent_60%)] z-10 pointer-events-none" />
 
       {/* ===================================================================== */}
       {/* 2. DYNAMIC CONTENT CONTAINER (ANIMATES IN ON SLIDE CHANGE)            */}
       {/* ===================================================================== */}
-      <div className="relative z-20 w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14 py-12 sm:py-20 pb-20 sm:pb-24">
-        <div key={current.id} className="max-w-2xl space-y-3.5 sm:space-y-5 animate-in fade-in slide-in-from-left-6 duration-700 ease-out">
-          {/* Top Badges */}
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
-            <span className="badge-streamit-4k font-mono shadow-md shadow-red-950/40 text-[9px] sm:text-[10px]">
+      <div className="relative z-20 w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14 pt-28 sm:pt-36 lg:pt-40 pb-16 sm:pb-20">
+        <div key={current.id} className="max-w-2xl space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-left-6 duration-700 ease-out">
+          {/* Top Badges: Quality, Real Rating, Year, Duration, Audio */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            <span className="badge-streamit-4k font-mono shadow-md shadow-red-950/40 text-[9px] sm:text-[10px] tracking-wider">
               {current.badge}
             </span>
 
-            <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md border border-amber-500/30 text-amber-300 text-[11px] sm:text-xs font-bold shadow-sm">
-              <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-400 text-amber-400" />
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-amber-500/30 text-amber-300 text-xs font-bold shadow-sm">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
               <span>{current.rating.toFixed(1)} IMDb</span>
             </div>
 
-            <span className="text-[11px] sm:text-xs font-semibold text-[#E2E4E9] bg-white/10 backdrop-blur-md px-2 sm:px-2.5 py-0.5 rounded-md">
+            <span className="text-xs font-semibold text-[#E2E4E9] bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/[0.08]">
               {current.year}
             </span>
 
-            <span className="text-[11px] sm:text-xs font-semibold text-[#C2C6D1] flex items-center gap-1 bg-black/40 backdrop-blur-md px-2 sm:px-2.5 py-0.5 rounded-md">
-              <Clock className="w-3 h-3 text-[#9EA3B0]" />
+            <span className="text-xs font-semibold text-[#C2C6D1] flex items-center gap-1.5 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/[0.08]">
+              <Clock className="w-3.5 h-3.5 text-[#9EA3B0]" />
               {current.duration}
+            </span>
+
+            <span className="hidden sm:inline-flex text-[11px] font-bold text-zinc-300 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/[0.08] uppercase tracking-wider">
+              Dolby Atmos • 5.1
             </span>
           </div>
 
           {/* Title & Tagline */}
-          <div className="space-y-1">
-            <p className="text-[11px] sm:text-sm font-black tracking-widest uppercase text-[#E50000] flex items-center gap-1.5 font-['Space_Grotesk']">
-              <Flame className="w-3.5 h-3.5 fill-red-500 shrink-0" />
-              <span className="truncate">{current.tagline}</span>
-            </p>
-            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] sm:text-xs font-black tracking-widest uppercase text-[#E50000] flex items-center gap-1.5 font-['Space_Grotesk'] bg-red-600/10 px-2.5 py-0.5 rounded-full border border-red-500/20">
+                <Flame className="w-3.5 h-3.5 fill-red-500 shrink-0" />
+                <span>{current.tagline}</span>
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)]">
               {current.title}
             </h1>
           </div>
@@ -220,10 +230,10 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
           </p>
 
           {/* Action CTAs */}
-          <div className="flex items-center gap-2.5 sm:gap-4 pt-1 sm:pt-2">
+          <div className="flex items-center gap-2.5 sm:gap-4 pt-2 sm:pt-3">
             <Link
               href={current.href}
-              className="btn-screenbox-red flex-1 sm:flex-initial px-5 sm:px-8 py-3 sm:py-3.5 text-xs sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-red-950/60 active:scale-95 hover:scale-105 transition-all duration-300 cursor-pointer"
+              className="btn-screenbox-red flex-1 sm:flex-initial px-6 sm:px-8 py-3.5 sm:py-4 text-xs sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-red-950/60 active:scale-95 hover:scale-105 transition-all duration-300 cursor-pointer"
             >
               <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-[#E50000] flex items-center justify-center shrink-0">
                 <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current ml-0.5" />
@@ -233,9 +243,9 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
 
             <Link
               href="/tv"
-              className="btn-screenbox-dark flex-1 sm:flex-initial px-4 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-base rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 border-white/10 hover:border-red-500/40 active:scale-95 hover:scale-105 transition-all duration-300 cursor-pointer"
+              className="btn-screenbox-dark flex-1 sm:flex-initial px-5 sm:px-7 py-3.5 sm:py-4 text-xs sm:text-base rounded-xl flex items-center justify-center gap-2 border-white/10 hover:border-red-500/40 active:scale-95 hover:scale-105 transition-all duration-300 cursor-pointer"
             >
-              <Tv className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 shrink-0" />
+              <Tv className="w-4 h-4 text-red-500 shrink-0" />
               <span className="whitespace-nowrap">Explore Live TV</span>
             </Link>
           </div>

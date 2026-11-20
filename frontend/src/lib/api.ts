@@ -100,11 +100,16 @@ export async function getCategories(type: string = "tv"): Promise<Category[]> {
 
 export interface HomePayload {
   hero: Movie[];
-  featured_channels: Channel[];
-  bangla_ott_originals: Movie[];
+  top_10?: Movie[];
+  popular_movies?: Movie[];
   trending_movies: Movie[];
   latest_movies: Movie[];
+  action_movies?: Movie[];
+  bollywood_movies?: Movie[];
+  animation_movies?: Movie[];
+  bangla_ott_originals: Movie[];
   popular_series: Series[];
+  featured_channels: Channel[];
   categories: Category[];
 }
 
