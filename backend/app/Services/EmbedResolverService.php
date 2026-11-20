@@ -50,15 +50,6 @@ class EmbedResolverService
                 'priority' => 30,
                 'is_embed' => true,
             ],
-            [
-                'id' => 1005,
-                'server_name' => '2Embed (HD Stream)',
-                'stream_type' => 'embed',
-                'stream_url' => "https://www.2embed.cc/embed/{$tmdbId}",
-                'quality' => '720p',
-                'priority' => 35,
-                'is_embed' => true,
-            ],
         ];
 
         if ($imdbId) {
@@ -122,15 +113,6 @@ class EmbedResolverService
                 'stream_url' => "https://player.autoembed.cc/embed/tv/{$tmdbId}/{$season}/{$episode}",
                 'quality' => '1080p',
                 'priority' => 30,
-                'is_embed' => true,
-            ],
-            [
-                'id' => 2005,
-                'server_name' => '2Embed (HD Stream)',
-                'stream_type' => 'embed',
-                'stream_url' => "https://www.2embed.cc/embedtv/{$tmdbId}&s={$season}&e={$episode}",
-                'quality' => '720p',
-                'priority' => 35,
                 'is_embed' => true,
             ],
         ];
