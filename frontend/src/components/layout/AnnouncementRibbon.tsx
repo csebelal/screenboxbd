@@ -12,8 +12,8 @@ export default function AnnouncementRibbon() {
     link: string;
     color: string;
   }>({
-    active: true,
-    text: "🔥 নতুন আপডেট: BDIX 4K সার্ভার যুক্ত হয়েছে! কোনো প্রকার বাফারিং ছাড়াই সমস্ত খেলা ও মুভি উপভোগ করুন।",
+    active: false,
+    text: "",
     link: "/subscriptions",
     color: "emerald",
   });

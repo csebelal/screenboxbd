@@ -134,7 +134,7 @@ export default function FaqAccordion() {
             </button>
 
             {isOpen && (
-              <div className="mt-4 pt-4 border-t border-white/[0.06] text-xs sm:text-sm text-[#9EA3B0] leading-relaxed pl-14 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="mt-4 pt-4 border-t border-white/[0.06] text-xs sm:text-sm text-[#9EA3B0] leading-relaxed pl-0 sm:pl-14 animate-in fade-in slide-in-from-top-2 duration-200">
                 {faq.answer}
               </div>
             )}

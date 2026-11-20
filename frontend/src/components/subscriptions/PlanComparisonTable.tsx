@@ -98,98 +98,106 @@ export default function PlanComparisonTable() {
       </div>
 
       {/* Comparison Table Container */}
-      <div className="streamit-card overflow-hidden border border-white/10 shadow-2xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[640px]">
-            {/* Table Header */}
-            <thead>
-              <tr className="border-b border-white/[0.08] bg-[#0E1016]">
-                <th className="p-5 sm:p-6 text-xs sm:text-sm font-bold text-[#9EA3B0] uppercase tracking-wider w-1/4">
-                  ফিচার ও সুবিধাসমূহ
-                </th>
-                <th className="p-5 sm:p-6 text-sm font-bold text-white w-1/4">
-                  Basic HD
-                </th>
-                <th className="p-5 sm:p-6 text-sm font-bold text-white w-1/4 bg-red-950/20 border-x border-red-500/20">
-                  <div className="flex items-center gap-2">
-                    <span className="text-white font-black">Standard 1080p</span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#E50000] text-white shadow-sm">
-                      জনপ্রিয়
-                    </span>
-                  </div>
-                </th>
-                <th className="p-5 sm:p-6 text-sm font-bold text-white w-1/4">
-                  <div className="flex items-center gap-1.5 text-amber-400">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Premium 4K VIP</span>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-
-            {/* Table Body */}
-            <tbody className="divide-y divide-white/[0.06] text-xs sm:text-sm">
-              {comparisonRows.map((row) => (
-                <tr key={row.feature} className="hover:bg-white/[0.02] transition">
-                  {/* Feature Title */}
-                  <td className="p-5 sm:p-6 font-bold text-white">
-                    {row.feature}
-                  </td>
-
-                  {/* Basic Column */}
-                  <td className="p-5 sm:p-6 text-[#9EA3B0]">
-                    {typeof row.basic === "boolean" ? (
-                      row.basic ? (
-                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                          <Check className="w-3.5 h-3.5 stroke-[3]" />
-                        </div>
-                      ) : (
-                        <div className="w-5 h-5 rounded-full bg-white/[0.05] text-[#666C7A] flex items-center justify-center">
-                          <X className="w-3.5 h-3.5" />
-                        </div>
-                      )
-                    ) : (
-                      row.basic
-                    )}
-                  </td>
-
-                  {/* Standard Column (Highlighted) */}
-                  <td className="p-5 sm:p-6 text-white font-medium bg-red-950/10 border-x border-red-500/15">
-                    {typeof row.standard === "boolean" ? (
-                      row.standard ? (
-                        <div className="w-5 h-5 rounded-full bg-red-600/30 text-red-400 flex items-center justify-center border border-red-500/40">
-                          <Check className="w-3.5 h-3.5 stroke-[3]" />
-                        </div>
-                      ) : (
-                        <div className="w-5 h-5 rounded-full bg-white/[0.05] text-[#666C7A] flex items-center justify-center">
-                          <X className="w-3.5 h-3.5" />
-                        </div>
-                      )
-                    ) : (
-                      row.standard
-                    )}
-                  </td>
-
-                  {/* Premium Column */}
-                  <td className="p-5 sm:p-6 text-[#E2E4E9] font-medium">
-                    {typeof row.premium === "boolean" ? (
-                      row.premium ? (
-                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
-                          <Check className="w-3.5 h-3.5 stroke-[3]" />
-                        </div>
-                      ) : (
-                        <div className="w-5 h-5 rounded-full bg-white/[0.05] text-[#666C7A] flex items-center justify-center">
-                          <X className="w-3.5 h-3.5" />
-                        </div>
-                      )
-                    ) : (
-                      <span className="text-white font-semibold">{row.premium}</span>
-                    )}
-                  </td>
+      <div>
+        <div className="sm:hidden flex items-center justify-between text-xs text-[#9EA3B0] mb-2 px-1">
+          <span>ফিচার তুলনা</span>
+          <span className="text-[#E50000] font-bold flex items-center gap-1">
+            সোয়াইপ করে দেখুন &rarr;
+          </span>
+        </div>
+        <div className="streamit-card overflow-hidden border border-white/10 shadow-2xl">
+          <div className="overflow-x-auto touch-pan-x">
+            <table className="w-full text-left border-collapse min-w-[580px]">
+              {/* Table Header */}
+              <thead>
+                <tr className="border-b border-white/[0.08] bg-[#0E1016]">
+                  <th className="p-3.5 sm:p-6 text-xs sm:text-sm font-bold text-[#9EA3B0] uppercase tracking-wider w-1/4">
+                    ফিচার ও সুবিধাসমূহ
+                  </th>
+                  <th className="p-3.5 sm:p-6 text-xs sm:text-sm font-bold text-white w-1/4">
+                    Basic HD
+                  </th>
+                  <th className="p-3.5 sm:p-6 text-xs sm:text-sm font-bold text-white w-1/4 bg-red-950/20 border-x border-red-500/20">
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-black">Standard 1080p</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#E50000] text-white shadow-sm">
+                        জনপ্রিয়
+                      </span>
+                    </div>
+                  </th>
+                  <th className="p-3.5 sm:p-6 text-xs sm:text-sm font-bold text-white w-1/4">
+                    <div className="flex items-center gap-1.5 text-amber-400">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Premium 4K VIP</span>
+                    </div>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              {/* Table Body */}
+              <tbody className="divide-y divide-white/[0.06] text-xs sm:text-sm">
+                {comparisonRows.map((row) => (
+                  <tr key={row.feature} className="hover:bg-white/[0.02] transition">
+                    {/* Feature Title */}
+                    <td className="p-3.5 sm:p-6 font-bold text-white">
+                      {row.feature}
+                    </td>
+
+                    {/* Basic Column */}
+                    <td className="p-3.5 sm:p-6 text-[#9EA3B0]">
+                      {typeof row.basic === "boolean" ? (
+                        row.basic ? (
+                          <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          </div>
+                        ) : (
+                          <div className="w-5 h-5 rounded-full bg-white/[0.05] text-[#666C7A] flex items-center justify-center">
+                            <X className="w-3.5 h-3.5" />
+                          </div>
+                        )
+                      ) : (
+                        row.basic
+                      )}
+                    </td>
+
+                    {/* Standard Column (Highlighted) */}
+                    <td className="p-3.5 sm:p-6 text-white font-medium bg-red-950/10 border-x border-red-500/15">
+                      {typeof row.standard === "boolean" ? (
+                        row.standard ? (
+                          <div className="w-5 h-5 rounded-full bg-red-600/30 text-red-400 flex items-center justify-center border border-red-500/40">
+                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          </div>
+                        ) : (
+                          <div className="w-5 h-5 rounded-full bg-white/[0.05] text-[#666C7A] flex items-center justify-center">
+                            <X className="w-3.5 h-3.5" />
+                          </div>
+                        )
+                      ) : (
+                        row.standard
+                      )}
+                    </td>
+
+                    {/* Premium Column */}
+                    <td className="p-3.5 sm:p-6 text-[#E2E4E9] font-medium">
+                      {typeof row.premium === "boolean" ? (
+                        row.premium ? (
+                          <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          </div>
+                        ) : (
+                          <div className="w-5 h-5 rounded-full bg-white/[0.05] text-[#666C7A] flex items-center justify-center">
+                            <X className="w-3.5 h-3.5" />
+                          </div>
+                        )
+                      ) : (
+                        <span className="text-white font-semibold">{row.premium}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>

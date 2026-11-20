@@ -17,14 +17,12 @@ class PlatformDynamicController extends Controller
      */
     public function settings(): JsonResponse
     {
-        $settings = \Illuminate\Support\Facades\Cache::remember('platform_settings_public', 300, function () {
-            return Setting::getAllPublic();
-        });
+        $settings = Setting::getAllPublic();
 
         return response()->json([
             'status' => 'success',
             'data' => $settings,
-        ])->header('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+        ])->header('Cache-Control', 'no-cache, private');
     }
 
     /**

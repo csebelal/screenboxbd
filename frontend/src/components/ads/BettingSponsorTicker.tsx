@@ -6,7 +6,7 @@ interface BettingSponsorTickerProps {
   sponsor?: AdSlot | null;
 }
 
-export default function BettingSponsorTicker({ sponsor }: BettingSponsorTickerProps) {
+export default function BettingSponsorTicker() {
   // All sponsor / betting sections completely disabled
   return null;
 }

@@ -30,6 +30,8 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 
 interface LiveTvTheaterProps {
@@ -48,6 +50,7 @@ export default function LiveTvTheater({
   const [searchFilter, setSearchFilter] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [copiedShare, setCopiedShare] = useState<boolean>(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Fullscreen hover dock states
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -76,6 +79,10 @@ export default function LiveTvTheater({
       setIsUsingProxy(false);
     } else {
       setCurrentStreamUrl("");
+    }
+    // On mobile, smoothly bring the player into view so user sees the channel load immediately
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      playerContainerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -189,9 +196,61 @@ export default function LiveTvTheater({
   }, [allChannels, searchFilter, selectedCategory]);
 
   return (
-    <div className="w-full px-3 sm:px-5 md:px-7 lg:px-10 xl:px-12 py-5 sm:py-7 space-y-6">
-      {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="w-full px-2.5 sm:px-5 md:px-7 lg:px-10 xl:px-12 py-3 sm:py-7 space-y-3.5 sm:space-y-6">
+      {/* ===================================================================== */}
+      {/* TOP HEADER BAR (Mobile Compact Bar / Desktop Cinematic Theater)      */}
+      {/* ===================================================================== */}
+      {/* 1. Mobile Compact Header (Zero vertical bloat, immediate player view) */}
+      <div className="sm:hidden flex items-center justify-between gap-2 pb-1 border-b border-white/[0.06]">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-2 h-2 rounded-full bg-red-500 live-pulse shrink-0" />
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-base font-black text-white tracking-tight truncate">
+                Live TV Theater
+              </h1>
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-red-500/15 text-red-400 border border-red-500/20 shrink-0">
+                218 BDIX
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={handleShare}
+            className="p-1.5 rounded-lg bg-[#141620] border border-white/10 text-white text-xs active:scale-95 transition"
+            title="Share channel"
+          >
+            {copiedShare ? (
+              <Check className="w-4 h-4 text-emerald-400" />
+            ) : (
+              <Share2 className="w-4 h-4 text-zinc-300" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="p-1.5 rounded-lg bg-[#141620] border border-white/10 text-white text-xs active:scale-95 transition"
+            title="Fullscreen player"
+          >
+            <Maximize2 className="w-4 h-4 text-zinc-300" />
+          </button>
+
+          <Link
+            href="/"
+            className="p-1.5 rounded-lg bg-[#141620] border border-white/10 text-white text-xs active:scale-95 transition"
+            title="Back to Home"
+          >
+            <ArrowLeft className="w-4 h-4 text-zinc-300" />
+          </Link>
+        </div>
+      </div>
+
+      {/* 2. Desktop Grand Theater Header */}
+      <div className="hidden sm:flex flex-row items-center justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-600/10 text-red-500 border border-red-500/20 mb-1">
             <Radio className="w-3.5 h-3.5 live-pulse" />
@@ -205,7 +264,7 @@ export default function LiveTvTheater({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleShare}
@@ -248,43 +307,40 @@ export default function LiveTvTheater({
       {/* ===================================================================== */}
       {/* MAIN 2-COLUMN STAGE: 60% STREAMING (LEFT) + 40% CHANNELS (RIGHT)     */}
       {/* ===================================================================== */}
-      <div className="flex flex-col lg:flex-row gap-5 lg:gap-6 items-start w-full">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start w-full">
         {/* =================================================================== */}
         {/* 1. LEFT SIDE: STREAMING PLAYER & CONTROLS (60% Width)              */}
         {/* =================================================================== */}
-        <div className="w-full lg:w-[60%] shrink-0 space-y-4">
+        <div className="w-full lg:w-[60%] shrink-0 space-y-3 sm:space-y-4">
           {/* Video Player Wrapper Container (Supports Browser Fullscreen) */}
           <div
             ref={playerContainerRef}
             onMouseMove={handleMouseMoveFullscreen}
-            className={`relative rounded-2xl overflow-hidden border border-white/10 bg-black shadow-2xl shadow-black/95 ${
+            className={`relative rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 bg-black shadow-2xl shadow-black/95 ${
               isFullscreen ? "fixed inset-0 z-50 rounded-none border-none w-screen h-screen" : "w-full aspect-video"
             }`}
           >
-            {/* Top Badges Overlay */}
-            <div className="absolute top-4 left-4 z-20 flex items-center gap-2 pointer-events-none">
-              <span className="badge-streamit-live">
-                <span className="w-2 h-2 rounded-full bg-white live-pulse" />
+            {/* Top Left Badges Overlay */}
+            <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 z-20 flex items-center pointer-events-none">
+              <span className="badge-streamit-live opacity-50 text-[10px] sm:text-xs py-0.5 px-2">
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white live-pulse" />
                 LIVE
               </span>
-              <span className="badge-streamit-4k">1080p 60FPS</span>
             </div>
 
-            <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-black/70 backdrop-blur-md text-emerald-400 border border-emerald-500/30">
-                ● LOW LATENCY
-              </span>
-              {isFullscreen && (
+            {/* Top Right Fullscreen Exit Button */}
+            {isFullscreen && (
+              <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 z-20 flex items-center">
                 <button
                   type="button"
                   onClick={toggleFullscreen}
-                  className="w-8 h-8 rounded-lg bg-black/70 hover:bg-red-600 text-white flex items-center justify-center border border-white/20 transition cursor-pointer"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-black/75 hover:bg-red-600 text-white flex items-center justify-center border border-white/20 transition cursor-pointer"
                   title="Exit Fullscreen"
                 >
-                  <Minimize2 className="w-4 h-4" />
+                  <Minimize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Artplayer Streaming Canvas */}
             {currentStreamUrl ? (
@@ -436,9 +492,9 @@ export default function LiveTvTheater({
           </div>
 
           {/* Active Channel Details & Stream Controls Bar */}
-          <div className="screenbox-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-[#0D0E14] border border-white/[0.08] flex items-center justify-center p-2 shrink-0 shadow-inner">
+          <div className="screenbox-card p-3 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-[#0D0E14] border border-white/[0.08] flex items-center justify-center p-1.5 sm:p-2 shrink-0 shadow-inner">
                 {activeChannel.logo_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -447,30 +503,29 @@ export default function LiveTvTheater({
                     className="max-h-full max-w-full object-contain"
                   />
                 ) : (
-                  <Tv className="w-6 h-6 text-[#9EA3B0]" />
+                  <Tv className="w-5 h-5 sm:w-6 sm:h-6 text-[#9EA3B0]" />
                 )}
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg sm:text-xl font-black text-white">
+                  <h2 className="text-base sm:text-xl font-black text-white truncate">
                     {activeChannel.name}
                   </h2>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white/[0.06] text-zinc-300 uppercase">
+                  <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/[0.06] text-zinc-300 uppercase shrink-0">
                     {activeChannel.country || "BD"}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold shadow-sm">
-                    <span className="relative flex h-2 w-2">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
+                  <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] sm:text-xs font-bold shadow-sm">
+                    <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-red-500"></span>
                     </span>
-                    <span className="tracking-wide">LIVE BROADCAST</span>
+                    <span className="tracking-wide">LIVE</span>
                   </div>
-                  <span className="text-[11px] text-zinc-500 hidden sm:inline">&bull;</span>
-                  <span className="text-xs text-[#9EA3B0]">
-                    {activeChannel.category?.name || "General"} &bull; 1080p BDIX &bull; Multi-Server
+                  <span className="text-[10px] sm:text-xs text-[#9EA3B0] truncate">
+                    {activeChannel.category?.name || "General"} &bull; 1080p BDIX
                   </span>
                 </div>
               </div>
@@ -478,7 +533,7 @@ export default function LiveTvTheater({
 
             {/* Server Selector Bar */}
             {streams.length > 0 && (
-              <div className="self-start sm:self-auto">
+              <div className="w-full sm:w-auto">
                 <ServerSelector
                   streams={streams}
                   currentStreamUrl={currentStreamUrl}
@@ -493,44 +548,78 @@ export default function LiveTvTheater({
         {/* =================================================================== */}
         {/* 2. RIGHT SIDE: LIVE CHANNELS GUIDE PANEL (40% Width)                */}
         {/* =================================================================== */}
-        <div className="w-full lg:w-[40%] screenbox-card p-4 sm:p-5 space-y-4">
-          {/* Guide Header with Live Count */}
+        <div className="w-full lg:w-[40%] screenbox-card p-3.5 sm:p-5 space-y-3.5 sm:space-y-4">
+          {/* Guide Header with Live Count and View Toggle */}
           <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-black text-white">
                   Live Channels
                 </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-red-600/20 text-red-400 border border-red-500/30 uppercase tracking-wider">
+                <span className="hidden lg:inline-flex px-2 py-0.5 rounded-full text-[10px] font-black bg-red-600/20 text-red-400 border border-red-500/30 uppercase tracking-wider">
                   5 per row
+                </span>
+                <span className="lg:hidden px-2 py-0.5 rounded-full text-[10px] font-black bg-red-600/20 text-red-400 border border-red-500/30 uppercase tracking-wider">
+                  {filteredChannels.length} feeds
                 </span>
               </div>
               <p className="text-xs text-[#9EA3B0] mt-0.5">
                 {filteredChannels.length} active broadcast feeds
               </p>
             </div>
-            <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#12141C] border border-white/[0.08] text-white flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-red-500 live-pulse" />
-              <span>Live TV</span>
-            </span>
+
+            <div className="flex items-center gap-2">
+              {/* Mobile & Tablet View Toggle (Grid 3-col vs List view) */}
+              <div className="flex items-center bg-[#0E1017] p-0.5 rounded-lg border border-white/[0.08]">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={`p-1.5 rounded-md transition cursor-pointer active:scale-95 ${
+                    viewMode === "grid"
+                      ? "bg-[#E50000] text-white shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                  title="Grid View (3 per row)"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={`p-1.5 rounded-md transition cursor-pointer active:scale-95 ${
+                    viewMode === "list"
+                      ? "bg-[#E50000] text-white shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                  title="List View"
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <span className="px-2 py-1 rounded-lg text-xs font-bold bg-[#12141C] border border-white/[0.08] text-white hidden sm:flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-red-500 live-pulse" />
+                <span>Live TV</span>
+              </span>
+            </div>
           </div>
 
           {/* Search Input Filter */}
           <div className="relative">
-            <Search className="w-4 h-4 text-[#666C7A] absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-[#666C7A] absolute left-3 top-2.5 sm:top-3" />
             <input
               type="text"
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               placeholder="Search 218 channels..."
-              className="w-full bg-[#0D0E14] border border-white/[0.08] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-[#666C7A] focus:outline-none focus:border-red-500 transition shadow-inner"
+              className="w-full bg-[#0D0E14] border border-white/[0.08] rounded-xl pl-9 pr-8 py-2 text-xs sm:text-sm text-white placeholder-[#666C7A] focus:outline-none focus:border-red-500 transition shadow-inner"
             />
             {searchFilter && (
               <button
                 type="button"
                 onClick={() => setSearchFilter("")}
                 aria-label="Clear search"
-                className="absolute right-2.5 top-2.5 p-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                className="absolute right-2 top-2 p-1 rounded-full text-zinc-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -547,9 +636,9 @@ export default function LiveTvTheater({
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`text-[11px] font-bold px-2.5 py-1 rounded-lg whitespace-nowrap transition cursor-pointer flex items-center gap-1 ${
+                  className={`text-[10px] sm:text-[11px] font-bold px-2.5 py-1 sm:py-1.5 rounded-lg whitespace-nowrap transition cursor-pointer flex items-center gap-1 active:scale-95 ${
                     isSelected
-                      ? "bg-[#E50000] text-white shadow-sm"
+                      ? "bg-[#E50000] text-white shadow-sm shadow-red-950/50"
                       : "bg-[#10121A] border border-white/[0.08] text-[#9EA3B0] hover:text-white"
                   }`}
                 >
@@ -561,15 +650,15 @@ export default function LiveTvTheater({
           </div>
 
           {/* ================================================================= */}
-          {/* EXACTLY 5 CHANNELS PER ROW GRID (lg:grid-cols-5)                  */}
+          {/* CHANNELS CONTAINER: GRID OR LIST MODE                             */}
           {/* ================================================================= */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-1.5 sm:gap-2 max-h-[660px] overflow-y-auto pr-1">
-            {filteredChannels.length === 0 ? (
-              <div className="col-span-full p-8 text-center text-xs text-[#666C7A]">
-                No channels match your search.
-              </div>
-            ) : (
-              filteredChannels.map((channel) => {
+          {filteredChannels.length === 0 ? (
+            <div className="p-8 text-center text-xs text-[#666C7A]">
+              No channels match your search.
+            </div>
+          ) : viewMode === "grid" ? (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-1.5 sm:gap-2 max-h-[520px] sm:max-h-[660px] overflow-y-auto pr-1">
+              {filteredChannels.map((channel) => {
                 const isActive = channel.id === activeChannel.id;
 
                 return (
@@ -601,7 +690,7 @@ export default function LiveTvTheater({
                     {/* Title */}
                     <div className="text-center mt-0.5 w-full pointer-events-none">
                       <h4
-                        className={`text-[10px] sm:text-[11px] font-bold truncate leading-tight ${
+                        className={`text-[9.5px] sm:text-[11px] font-bold truncate leading-tight ${
                           isActive ? "text-red-400 font-black" : "text-white group-hover:text-red-400"
                         }`}
                         title={channel.name}
@@ -609,7 +698,7 @@ export default function LiveTvTheater({
                         {channel.name}
                       </h4>
                       {isActive && (
-                        <span className="inline-flex items-center justify-center gap-1 text-[7.5px] font-black text-red-400 uppercase tracking-wider mt-0.5">
+                        <span className="inline-flex items-center justify-center gap-1 text-[7px] sm:text-[7.5px] font-black text-red-400 uppercase tracking-wider mt-0.5">
                           <span className="relative flex h-1.5 w-1.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
@@ -620,9 +709,70 @@ export default function LiveTvTheater({
                     </div>
                   </button>
                 );
-              })
-            )}
-          </div>
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-1.5 max-h-[520px] sm:max-h-[660px] overflow-y-auto pr-1">
+              {filteredChannels.map((channel) => {
+                const isActive = channel.id === activeChannel.id;
+
+                return (
+                  <button
+                    key={channel.id}
+                    type="button"
+                    onClick={() => handleChannelChange(channel)}
+                    className={`w-full p-2 rounded-xl border transition-all duration-150 cursor-pointer flex items-center justify-between gap-2.5 btn-tactile text-left ${
+                      isActive
+                        ? "bg-red-950/40 border-[#E50000] ring-1 ring-red-500 shadow-md shadow-red-950/50"
+                        : "bg-[#0E1017] border-white/[0.06] hover:border-red-500/40 hover:bg-[#141722] active:scale-[0.99]"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#08090D] border border-white/[0.04] p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                        {channel.logo_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={channel.logo_url}
+                            alt=""
+                            loading="lazy"
+                            className="max-h-full max-w-full object-contain"
+                          />
+                        ) : (
+                          <Tv className="w-4 h-4 text-[#666C7A]" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <h4
+                          className={`text-xs sm:text-sm font-bold truncate ${
+                            isActive ? "text-red-400 font-black" : "text-white"
+                          }`}
+                        >
+                          {channel.name}
+                        </h4>
+                        <p className="text-[10px] text-[#9EA3B0] truncate">
+                          {channel.category?.name || "General"} &bull; 1080p BDIX
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 flex items-center gap-2">
+                      {isActive ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-black border border-red-500/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 live-pulse" />
+                          PLAYING
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-zinc-500 group-hover:text-red-400 font-semibold flex items-center gap-0.5">
+                          <span>Watch</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

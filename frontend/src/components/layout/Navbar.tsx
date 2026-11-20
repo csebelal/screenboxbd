@@ -76,7 +76,25 @@ export default function Navbar() {
     },
   ];
 
-  // Close dropdowns on outside click
+  // Close dropdowns on outside click and route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setNotificationsOpen(false);
+    setProfileOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll when search modal or mobile menu is open
+  useEffect(() => {
+    if (searchModalOpen || mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [searchModalOpen, mobileMenuOpen]);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -202,7 +220,7 @@ export default function Navbar() {
 
               {/* Notifications Dropdown Panel */}
               {notificationsOpen && (
-                <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-2xl bg-[#12141C] border border-white/10 shadow-2xl shadow-black/90 p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] sm:w-96 max-w-sm rounded-2xl bg-[#12141C] border border-white/10 shadow-2xl shadow-black/90 p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
                   <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
                     <div className="flex items-center gap-2">
                       <Bell className="w-4 h-4 text-[#E50000]" />
@@ -274,7 +292,7 @@ export default function Navbar() {
 
               {/* Profile Dropdown */}
               {profileOpen && (
-                <div className="absolute right-0 mt-3 w-60 rounded-2xl bg-[#12141C] border border-white/10 shadow-2xl shadow-black/90 p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-3 w-64 max-w-[calc(100vw-2rem)] rounded-2xl bg-[#12141C] border border-white/10 shadow-2xl shadow-black/90 p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
                   <div className="p-2 border-b border-white/[0.08] mb-2">
                     <p className="text-xs font-bold text-white">Premium VIP Member</p>
                     <p className="text-[11px] text-[#9EA3B0] truncate">user@screenboxbd.com</p>
@@ -338,36 +356,43 @@ export default function Navbar() {
 
         {/* Mobile Slide-down Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-[#0F1117] border-b border-white/[0.08] px-4 pt-3 pb-6 space-y-2 animate-in slide-in-from-top-4 duration-200">
-            {navLinks.map((link) => {
-              const active = isLinkActive(link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition cursor-pointer ${
-                    active
-                      ? "bg-[#1C1F2B] text-white border border-[#E50000]/40 shadow-sm shadow-red-950/30"
-                      : "text-[#9EA3B0] hover:text-white hover:bg-white/[0.04]"
-                  }`}
-                >
-                  <span>{link.label}</span>
-                  {active && <span className="w-2 h-2 rounded-full bg-[#E50000]" />}
-                </Link>
-              );
-            })}
+          <>
+            {/* Backdrop overlay */}
+            <div
+              className="fixed inset-0 top-20 bg-black/60 backdrop-blur-sm z-30 md:hidden animate-in fade-in duration-200"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <div className="relative z-40 md:hidden bg-[#0F1117] border-b border-white/[0.08] px-4 pt-3 pb-6 space-y-2 animate-in slide-in-from-top-4 duration-200">
+              {navLinks.map((link) => {
+                const active = isLinkActive(link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-semibold transition active:scale-[0.98] cursor-pointer ${
+                      active
+                        ? "bg-[#1C1F2B] text-white border border-[#E50000]/40 shadow-sm shadow-red-950/30"
+                        : "text-[#9EA3B0] hover:text-white hover:bg-white/[0.04]"
+                    }`}
+                  >
+                    <span>{link.label}</span>
+                    {active && <span className="w-2 h-2 rounded-full bg-[#E50000]" />}
+                  </Link>
+                );
+              })}
 
-            <div className="pt-3 border-t border-white/[0.08] flex gap-2">
-              <Link
-                href="/subscriptions"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex-1 btn-screenbox-red text-xs py-3 text-center"
-              >
-                Get Premium Pass
-              </Link>
+              <div className="pt-3 border-t border-white/[0.08] flex gap-2">
+                <Link
+                  href="/subscriptions"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 btn-screenbox-red text-xs py-3.5 text-center font-bold"
+                >
+                  Get Premium Pass
+                </Link>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </header>
 

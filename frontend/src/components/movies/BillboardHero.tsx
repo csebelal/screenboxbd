@@ -10,7 +10,6 @@ import {
   Clock,
   Calendar,
   X,
-  Sparkles,
   Flame,
 } from "lucide-react";
 import { Movie } from "@/types";
@@ -25,6 +24,7 @@ export default function BillboardHero({ items }: BillboardHeroProps) {
   const [slideDirection, setSlideDirection] = useState<"next" | "prev">("next");
   const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   // Take top 6 recently added movies
   const movies = items && items.length > 0 ? items.slice(0, 6) : [];
@@ -41,6 +41,22 @@ export default function BillboardHero({ items }: BillboardHeroProps) {
     setSlideDirection("prev");
     setCurrentIndex((prev) => (prev - 1 + total) % total);
   }, [total]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (diff > 45) {
+      nextSlide();
+    } else if (diff < -45) {
+      prevSlide();
+    }
+    setTouchStartX(null);
+  };
 
   const goToSlide = useCallback(
     (index: number) => {
@@ -78,18 +94,20 @@ export default function BillboardHero({ items }: BillboardHeroProps) {
 
   return (
     <div
-      className="relative w-full my-4 select-none"
+      className="relative w-full my-2 sm:my-4 select-none"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Outer Coverflow Slider Stage */}
-      <div className="relative w-full h-[460px] sm:h-[520px] lg:h-[580px] overflow-hidden rounded-3xl bg-[#090A0D] border border-white/[0.08] shadow-2xl shadow-black/90">
+      <div className="relative w-full h-[480px] sm:h-[520px] lg:h-[580px] overflow-hidden rounded-2xl sm:rounded-3xl bg-[#090A0D] border border-white/[0.08] shadow-2xl shadow-black/90">
         {/* ========================================================= */}
-        {/* 1. LEFT PEEKING SLIDE (Previous Movie)                     */}
+        {/* 1. LEFT PEEKING SLIDE (Previous Movie) - Hidden on Mobile  */}
         {/* ========================================================= */}
         <div
           onClick={prevSlide}
-          className="absolute left-0 top-0 bottom-0 w-[14%] sm:w-[16%] lg:w-[18%] z-10 cursor-pointer overflow-hidden group/prev transition-transform"
+          className="absolute left-0 top-0 bottom-0 w-[14%] sm:w-[16%] lg:w-[18%] z-10 cursor-pointer overflow-hidden group/prev transition-transform hidden sm:block"
           title={`Previous: ${prevMovie.title}`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -111,23 +129,23 @@ export default function BillboardHero({ items }: BillboardHeroProps) {
           </div>
         </div>
 
-        {/* Left Arrow Button */}
+        {/* Left Arrow Button (Hidden on Mobile Touch) */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             prevSlide();
           }}
-          className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/75 hover:bg-[#E50000] border border-white/20 hover:border-red-500 text-white flex items-center justify-center transition-all duration-300 shadow-2xl hover:scale-110 cursor-pointer"
+          className="hidden sm:flex absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/75 hover:bg-[#E50000] border border-white/20 hover:border-red-500 text-white items-center justify-center transition-all duration-300 shadow-2xl hover:scale-110 cursor-pointer"
           aria-label="Previous Slide"
         >
           <ChevronLeft className="w-6 h-6 stroke-[2.5]" />
         </button>
 
         {/* ========================================================= */}
-        {/* 2. CENTER ACTIVE SLIDE (Direction-Aware Smooth Slide)      */}
+        {/* 2. CENTER ACTIVE SLIDE (Full width on mobile, Coverflow on tablet/desktop) */}
         {/* ========================================================= */}
-        <div className="absolute inset-y-0 left-[12%] right-[12%] sm:left-[14%] sm:right-[14%] lg:left-[16%] lg:right-[16%] z-20 overflow-hidden bg-[#0B0C0E] shadow-2xl">
+        <div className="absolute inset-y-0 left-0 right-0 sm:left-[14%] sm:right-[14%] lg:left-[16%] lg:right-[16%] z-20 overflow-hidden bg-[#0B0C0E] shadow-2xl">
           {movies.map((movie, idx) => {
             const isActive = idx === currentIndex;
             const isPrev = (currentIndex - 1 + total) % total === idx;
@@ -137,8 +155,8 @@ export default function BillboardHero({ items }: BillboardHeroProps) {
             const ratingNum = movie.rating ? Number(movie.rating) : 8.2;
             const starCount = Math.min(5, Math.max(1, Math.round(ratingNum / 2)));
             const formattedDuration = movie.duration_minutes
-              ? `${Math.floor(movie.duration_minutes / 60)}hr : ${movie.duration_minutes % 60}m`
-              : "2hr : 15m";
+              ? `${Math.floor(movie.duration_minutes / 60)}h ${movie.duration_minutes % 60}m`
+              : "2h 15m";
             const releaseYear = movie.release_year || "2024";
 
             return (
@@ -156,7 +174,7 @@ export default function BillboardHero({ items }: BillboardHeroProps) {
                     : "opacity-0 z-0 -translate-x-full pointer-events-none"
                 }`}
               >
-                {/* Backdrop Image with Slow Ken-Burns Camera Zoom & Vivid Highlighting */}
+                {/* Backdrop Image */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={
@@ -170,72 +188,68 @@ export default function BillboardHero({ items }: BillboardHeroProps) {
                   }`}
                 />
 
-                {/* Cinematic Highlight Gradients: Focused on left text for legibility, open & vivid on center & right */}
-                <div className="absolute inset-y-0 left-0 w-full max-w-2xl bg-gradient-to-r from-black/95 via-black/55 to-transparent pointer-events-none" />
-                <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/90 via-black/25 to-transparent pointer-events-none" />
-                <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+                {/* Gradients */}
+                <div className="absolute inset-y-0 left-0 w-full max-w-2xl bg-gradient-to-r from-black/95 via-black/60 to-transparent pointer-events-none" />
+                <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/95 via-black/40 to-transparent pointer-events-none" />
+                <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
 
-                {/* Slide Content Overlay with Staggered Entrance Animation */}
+                {/* Slide Content Overlay */}
                 {isActive && (
-                  <div className="absolute inset-0 p-6 sm:p-10 lg:p-14 flex flex-col justify-between animate-in fade-in slide-in-from-left-6 duration-700 ease-out">
+                  <div className="absolute inset-0 p-4 sm:p-10 lg:p-14 flex flex-col justify-between animate-in fade-in slide-in-from-left-6 duration-700 ease-out">
                     {/* Top Badges */}
                     <div className="flex items-center gap-2">
-                      <span className="badge-streamit-4k font-mono shadow-md shadow-red-950/40">
+                      <span className="badge-streamit-4k font-mono shadow-md shadow-red-950/40 text-[9px] sm:text-[10px]">
                         4K ULTRA HD
                       </span>
-                      <span className="px-2.5 py-0.5 rounded-md bg-[#E50000]/20 border border-red-500/30 text-[10px] font-black text-red-400 uppercase tracking-widest flex items-center gap-1">
-                        <Flame className="w-3 h-3 fill-red-500" />
-                        <span>RECENTLY ADDED #{idx + 1}</span>
+                      <span className="px-2 sm:px-2.5 py-0.5 rounded-md bg-[#E50000]/20 border border-red-500/30 text-[9px] sm:text-[10px] font-black text-red-400 uppercase tracking-widest flex items-center gap-1">
+                        <Flame className="w-3 h-3 fill-red-500 shrink-0" />
+                        <span>RECENT #{idx + 1}</span>
                       </span>
                     </div>
 
                     {/* Bottom & Center Info Group */}
-                    <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+                    <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-6 pb-6 sm:pb-0">
                       {/* Left Details Block */}
-                      <div className="max-w-2xl space-y-3.5 sm:space-y-4">
+                      <div className="max-w-2xl space-y-2.5 sm:space-y-4">
                         {/* Movie Title */}
-                        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight line-clamp-2 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
+                        <h1 className="text-xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight line-clamp-2 drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
                           {movie.title}
                         </h1>
 
                         {/* Rating & Metadata Bar */}
-                        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs text-[#E2E4E9]">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-[#E2E4E9]">
                           {/* Star Rating Icons */}
                           <div className="flex items-center gap-0.5 text-amber-400">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <Star
                                 key={star}
-                                className={`w-3.5 h-3.5 ${
+                                className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${
                                   star <= starCount
                                     ? "fill-amber-400 text-amber-400"
                                     : "text-zinc-600 fill-zinc-800"
                                 }`}
                               />
                             ))}
-                            <span className="text-white font-black ml-1.5 text-xs">
+                            <span className="text-white font-black ml-1 text-xs">
                               {ratingNum.toFixed(1)}
                             </span>
                           </div>
 
-                          {/* Gold IMDb Badge */}
-                          <div className="flex items-center px-1.5 py-0.5 rounded bg-[#F5C518] text-black font-extrabold text-[11px] tracking-tight shadow-sm">
+                          <div className="flex items-center px-1.5 py-0.5 rounded bg-[#F5C518] text-black font-extrabold text-[10px] sm:text-[11px] tracking-tight shadow-sm">
                             IMDb
                           </div>
 
-                          {/* PG Certification Badge */}
-                          <span className="px-2 py-0.5 rounded border border-white/30 text-white/90 text-[11px] font-bold">
+                          <span className="px-1.5 sm:px-2 py-0.5 rounded border border-white/30 text-white/90 text-[10px] sm:text-[11px] font-bold">
                             PG-13
                           </span>
 
-                          {/* Duration */}
-                          <span className="flex items-center gap-1 text-[#C2C6D1] text-xs font-semibold">
-                            <Clock className="w-3.5 h-3.5 text-[#8D92A0]" />
+                          <span className="flex items-center gap-1 text-[#C2C6D1] text-[11px] sm:text-xs font-semibold">
+                            <Clock className="w-3 h-3 text-[#8D92A0]" />
                             <span>{formattedDuration}</span>
                           </span>
 
-                          {/* Release Year */}
-                          <span className="flex items-center gap-1 text-[#C2C6D1] text-xs font-semibold">
-                            <Calendar className="w-3.5 h-3.5 text-[#8D92A0]" />
+                          <span className="flex items-center gap-1 text-[#C2C6D1] text-[11px] sm:text-xs font-semibold">
+                            <Calendar className="w-3 h-3 text-[#8D92A0]" />
                             <span>{releaseYear}</span>
                           </span>
                         </div>
@@ -246,38 +260,26 @@ export default function BillboardHero({ items }: BillboardHeroProps) {
                             "Experience high-octane suspense and breathtaking cinematic action in 4K resolution. Stream without interruptions now on ScreenBoxBD."}
                         </p>
 
-                        {/* Play Button Row */}
-                        <div className="pt-2 flex items-center gap-4">
+                        {/* Actions Row (Play Now + Watch Trailer) */}
+                        <div className="pt-2 flex flex-wrap items-center gap-2.5 sm:gap-4">
                           <Link
                             href={`/movies/${movie.slug}`}
-                            className="btn-screenbox-red px-7 sm:px-9 py-3 sm:py-3.5 rounded-xl font-extrabold text-sm sm:text-base flex items-center gap-2.5 shadow-xl shadow-red-950/60 hover:scale-105 transition-all duration-300 cursor-pointer"
+                            className="btn-screenbox-red px-6 sm:px-9 py-2.5 sm:py-3.5 rounded-xl font-extrabold text-xs sm:text-base flex items-center gap-2 shadow-xl shadow-red-950/60 active:scale-95 hover:scale-105 transition-all duration-300 cursor-pointer"
                           >
                             <span>Play Now</span>
-                            <Play className="w-4 h-4 fill-white" />
+                            <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white" />
                           </Link>
-                        </div>
-                      </div>
 
-                      {/* Right Side: Circular "WATCH TRAILER" Action Button */}
-                      <div className="self-start lg:self-center pb-2 lg:pb-0 lg:pr-8">
-                        <button
-                          type="button"
-                          onClick={() => setTrailerMovie(movie)}
-                          className="flex items-center gap-3 sm:gap-4 group/trailer cursor-pointer focus:outline-none"
-                          aria-label={`Watch Trailer for ${movie.title}`}
-                        >
-                          <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-full border-2 border-white/80 group-hover/trailer:border-[#E50000] backdrop-blur-md bg-white/10 group-hover/trailer:bg-[#E50000]/20 flex items-center justify-center transition-all duration-300 shadow-2xl group-hover/trailer:scale-110 shadow-black/80">
-                            <Play className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-white ml-0.5 group-hover/trailer:fill-[#E50000] group-hover/trailer:text-[#E50000] transition-colors" />
-                          </div>
-                          <div className="text-left">
-                            <span className="block text-xs sm:text-sm font-black tracking-widest text-white uppercase group-hover/trailer:text-red-400 transition-colors">
-                              WATCH TRAILER
-                            </span>
-                            <span className="text-[10px] text-[#9EA3B0] font-semibold">
-                              Full HD 1080p
-                            </span>
-                          </div>
-                        </button>
+                          {/* Watch Trailer Button */}
+                          <button
+                            type="button"
+                            onClick={() => setTrailerMovie(movie)}
+                            className="btn-screenbox-dark px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-xl font-bold text-xs sm:text-base flex items-center gap-2 border border-white/15 hover:border-red-500/40 active:scale-95 transition-all duration-300 cursor-pointer"
+                          >
+                            <Play className="w-3.5 h-3.5 text-red-500 fill-red-500" />
+                            <span>Watch Trailer</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -288,11 +290,11 @@ export default function BillboardHero({ items }: BillboardHeroProps) {
         </div>
 
         {/* ========================================================= */}
-        {/* 3. RIGHT PEEKING SLIDE (Next Movie)                        */}
+        {/* 3. RIGHT PEEKING SLIDE (Next Movie) - Hidden on Mobile     */}
         {/* ========================================================= */}
         <div
           onClick={nextSlide}
-          className="absolute right-0 top-0 bottom-0 w-[14%] sm:w-[16%] lg:w-[18%] z-10 cursor-pointer overflow-hidden group/next transition-transform"
+          className="absolute right-0 top-0 bottom-0 w-[14%] sm:w-[16%] lg:w-[18%] z-10 cursor-pointer overflow-hidden group/next transition-transform hidden sm:block"
           title={`Next: ${nextMovie.title}`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -314,14 +316,14 @@ export default function BillboardHero({ items }: BillboardHeroProps) {
           </div>
         </div>
 
-        {/* Right Arrow Button */}
+        {/* Right Arrow Button (Hidden on Mobile Touch) */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             nextSlide();
           }}
-          className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/75 hover:bg-[#E50000] border border-white/20 hover:border-red-500 text-white flex items-center justify-center transition-all duration-300 shadow-2xl hover:scale-110 cursor-pointer"
+          className="hidden sm:flex absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/75 hover:bg-[#E50000] border border-white/20 hover:border-red-500 text-white items-center justify-center transition-all duration-300 shadow-2xl hover:scale-110 cursor-pointer"
           aria-label="Next Slide"
         >
           <ChevronRight className="w-6 h-6 stroke-[2.5]" />

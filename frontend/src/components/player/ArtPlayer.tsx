@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Artplayer from "artplayer";
 import Hls from "hls.js";
-import { VolumeX, AlertCircle, RefreshCw, ShieldCheck } from "lucide-react";
+import { AlertCircle, RefreshCw, ShieldCheck } from "lucide-react";
 
 interface ArtPlayerProps {
   url: string;
@@ -25,7 +25,6 @@ export default function ArtPlayer({
 }: ArtPlayerProps) {
   const artRef = useRef<HTMLDivElement | null>(null);
   const playerInstance = useRef<Artplayer | null>(null);
-  const [isMuted, setIsMuted] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -167,15 +166,6 @@ export default function ArtPlayer({
       },
     });
 
-    // Sync muted state
-    art.on("video:volumechange", () => {
-      setIsMuted(art.muted);
-    });
-
-    art.on("ready", () => {
-      setIsMuted(art.muted);
-    });
-
     playerInstance.current = art;
 
     return () => {
@@ -186,15 +176,7 @@ export default function ArtPlayer({
         art.destroy(false);
       }
     };
-  }, [url, poster, isLive, onFallbackNeeded]);
-
-  const handleToggleMute = () => {
-    if (playerInstance.current) {
-      const nextMuted = !playerInstance.current.muted;
-      playerInstance.current.muted = nextMuted;
-      setIsMuted(nextMuted);
-    }
-  };
+  }, [url, poster, isLive, onFallbackNeeded, onToggleFullscreen]);
 
   const handleRetry = () => {
     setHasError(false);
@@ -205,12 +187,12 @@ export default function ArtPlayer({
 
   return (
     <div
-      className={`artplayer-wrapper relative w-full rounded-2xl overflow-hidden shadow-2xl border border-zinc-800/80 group ${className}`}
+      className={`artplayer-wrapper relative w-full h-full aspect-video overflow-hidden group ${className}`}
       style={{
         position: "relative",
         width: "100%",
+        height: "100%",
         aspectRatio: "16 / 9",
-        minHeight: "420px",
         backgroundColor: "#000",
       }}
     >
@@ -225,18 +207,6 @@ export default function ArtPlayer({
           height: "100%",
         }}
       />
-
-      {/* Floating Unmute Button */}
-      {isMuted && !hasError && (
-        <button
-          onClick={handleToggleMute}
-          className="absolute top-4 right-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/80 hover:bg-red-600 text-white text-xs font-semibold backdrop-blur-md transition-all shadow-lg border border-white/10 cursor-pointer"
-          title="Click to Unmute"
-        >
-          <VolumeX className="w-4 h-4 text-red-400 group-hover:text-white" />
-          <span>Tap to Unmute (M)</span>
-        </button>
-      )}
 
       {/* Error state overlay */}
       {hasError && (

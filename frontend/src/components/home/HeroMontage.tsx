@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { Movie } from "@/types";
 import { Play, Tv, Star, Clock, ChevronLeft, ChevronRight, Flame } from "lucide-react";
@@ -81,21 +81,35 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
   }, [movies]);
 
   const [activeSlide, setActiveSlide] = useState(0);
-  const [slideDirection, setSlideDirection] = useState<"next" | "prev">("next");
   const [isHovered, setIsHovered] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const slideCount = slides.length;
 
   const nextSlide = useCallback(() => {
     if (slideCount <= 1) return;
-    setSlideDirection("next");
     setActiveSlide((prev) => (prev + 1) % slideCount);
   }, [slideCount]);
 
   const prevSlide = useCallback(() => {
     if (slideCount <= 1) return;
-    setSlideDirection("prev");
     setActiveSlide((prev) => (prev - 1 + slideCount) % slideCount);
   }, [slideCount]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (diff > 45) {
+      nextSlide();
+    } else if (diff < -45) {
+      prevSlide();
+    }
+    setTouchStartX(null);
+  };
 
   // Auto advance slides every 7 seconds when not hovered
   useEffect(() => {
@@ -118,9 +132,11 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
 
   return (
     <div
-      className="relative w-full min-h-[580px] sm:min-h-[640px] lg:min-h-[720px] flex items-center overflow-hidden bg-[#07080B] select-none"
+      className="relative w-full min-h-[520px] sm:min-h-[640px] lg:min-h-[720px] flex items-center overflow-hidden bg-[#07080B] select-none"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* ===================================================================== */}
       {/* 1. CINEMATIC SLIDING BACKDROPS WITH HORIZONTAL SLIDE & KEN BURNS ZOOM  */}
@@ -164,24 +180,24 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
       {/* ===================================================================== */}
       {/* 2. DYNAMIC CONTENT CONTAINER (ANIMATES IN ON SLIDE CHANGE)            */}
       {/* ===================================================================== */}
-      <div className="relative z-20 w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14 py-16 sm:py-24">
-        <div key={current.id} className="max-w-2xl space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-left-6 duration-700 ease-out">
+      <div className="relative z-20 w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-14 py-12 sm:py-20 pb-20 sm:pb-24">
+        <div key={current.id} className="max-w-2xl space-y-3.5 sm:space-y-5 animate-in fade-in slide-in-from-left-6 duration-700 ease-out">
           {/* Top Badges */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            <span className="badge-streamit-4k font-mono shadow-md shadow-red-950/40">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
+            <span className="badge-streamit-4k font-mono shadow-md shadow-red-950/40 text-[9px] sm:text-[10px]">
               {current.badge}
             </span>
 
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md border border-amber-500/30 text-amber-300 text-xs font-bold shadow-sm">
-              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md border border-amber-500/30 text-amber-300 text-[11px] sm:text-xs font-bold shadow-sm">
+              <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-amber-400 text-amber-400" />
               <span>{current.rating.toFixed(1)} IMDb</span>
             </div>
 
-            <span className="text-xs font-semibold text-[#E2E4E9] bg-white/10 backdrop-blur-md px-2.5 py-0.5 rounded-md">
+            <span className="text-[11px] sm:text-xs font-semibold text-[#E2E4E9] bg-white/10 backdrop-blur-md px-2 sm:px-2.5 py-0.5 rounded-md">
               {current.year}
             </span>
 
-            <span className="text-xs font-semibold text-[#C2C6D1] flex items-center gap-1 bg-black/40 backdrop-blur-md px-2.5 py-0.5 rounded-md">
+            <span className="text-[11px] sm:text-xs font-semibold text-[#C2C6D1] flex items-center gap-1 bg-black/40 backdrop-blur-md px-2 sm:px-2.5 py-0.5 rounded-md">
               <Clock className="w-3 h-3 text-[#9EA3B0]" />
               {current.duration}
             </span>
@@ -189,54 +205,54 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
 
           {/* Title & Tagline */}
           <div className="space-y-1">
-            <p className="text-xs sm:text-sm font-black tracking-widest uppercase text-[#E50000] flex items-center gap-1.5 font-['Space_Grotesk']">
-              <Flame className="w-3.5 h-3.5 fill-red-500" />
-              <span>{current.tagline}</span>
+            <p className="text-[11px] sm:text-sm font-black tracking-widest uppercase text-[#E50000] flex items-center gap-1.5 font-['Space_Grotesk']">
+              <Flame className="w-3.5 h-3.5 fill-red-500 shrink-0" />
+              <span className="truncate">{current.tagline}</span>
             </p>
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
               {current.title}
             </h1>
           </div>
 
           {/* Synopsis */}
-          <p className="text-xs sm:text-sm md:text-base text-[#D0D4DF] leading-relaxed line-clamp-3 max-w-xl font-normal drop-shadow">
+          <p className="text-xs sm:text-sm md:text-base text-[#D0D4DF] leading-relaxed line-clamp-2 sm:line-clamp-3 max-w-xl font-normal drop-shadow">
             {current.overview}
           </p>
 
           {/* Action CTAs */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
+          <div className="flex items-center gap-2.5 sm:gap-4 pt-1 sm:pt-2">
             <Link
               href={current.href}
-              className="btn-screenbox-red px-8 py-3.5 text-sm sm:text-base rounded-xl flex items-center gap-2.5 shadow-xl shadow-red-950/60 hover:scale-105 transition-all duration-300 cursor-pointer"
+              className="btn-screenbox-red flex-1 sm:flex-initial px-5 sm:px-8 py-3 sm:py-3.5 text-xs sm:text-base rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-red-950/60 active:scale-95 hover:scale-105 transition-all duration-300 cursor-pointer"
             >
-              <div className="w-6 h-6 rounded-full bg-white text-[#E50000] flex items-center justify-center">
-                <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-[#E50000] flex items-center justify-center shrink-0">
+                <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current ml-0.5" />
               </div>
-              <span className="font-extrabold">Watch Now</span>
+              <span className="font-extrabold whitespace-nowrap">Watch Now</span>
             </Link>
 
             <Link
               href="/tv"
-              className="btn-screenbox-dark px-6 py-3.5 text-sm sm:text-base rounded-xl flex items-center gap-2 border-white/10 hover:border-red-500/40 hover:scale-105 transition-all duration-300 cursor-pointer"
+              className="btn-screenbox-dark flex-1 sm:flex-initial px-4 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-base rounded-xl flex items-center justify-center gap-1.5 sm:gap-2 border-white/10 hover:border-red-500/40 active:scale-95 hover:scale-105 transition-all duration-300 cursor-pointer"
             >
-              <Tv className="w-4 h-4 text-red-500" />
-              <span>Explore Live TV</span>
+              <Tv className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 shrink-0" />
+              <span className="whitespace-nowrap">Explore Live TV</span>
             </Link>
           </div>
 
           {/* Platform Metrics Highlights */}
-          <div className="pt-6 border-t border-white/[0.08] grid grid-cols-3 gap-4 max-w-lg">
+          <div className="pt-4 sm:pt-6 border-t border-white/[0.08] grid grid-cols-3 gap-2 sm:gap-4 max-w-lg">
             <div>
-              <p className="text-lg sm:text-2xl font-black text-white">218+</p>
-              <p className="text-[11px] text-[#9EA3B0] uppercase font-semibold">Live Channels</p>
+              <p className="text-base sm:text-2xl font-black text-white">218+</p>
+              <p className="text-[9px] sm:text-[11px] text-[#9EA3B0] uppercase font-semibold">Live Channels</p>
             </div>
             <div>
-              <p className="text-lg sm:text-2xl font-black text-white">900+</p>
-              <p className="text-[11px] text-[#9EA3B0] uppercase font-semibold">4K Movies</p>
+              <p className="text-base sm:text-2xl font-black text-white">900+</p>
+              <p className="text-[9px] sm:text-[11px] text-[#9EA3B0] uppercase font-semibold">4K Movies</p>
             </div>
             <div>
-              <p className="text-lg sm:text-2xl font-black text-white">0s</p>
-              <p className="text-[11px] text-[#9EA3B0] uppercase font-semibold">Buffer Delay</p>
+              <p className="text-base sm:text-2xl font-black text-white">0s</p>
+              <p className="text-[9px] sm:text-[11px] text-[#9EA3B0] uppercase font-semibold">Buffer Delay</p>
             </div>
           </div>
         </div>
@@ -245,7 +261,7 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
       {/* ===================================================================== */}
       {/* 3. BOTTOM SLIDE NAVIGATION & THUMBNAIL DOCK                           */}
       {/* ===================================================================== */}
-      <div className="absolute bottom-6 right-4 sm:right-8 lg:right-12 z-20 flex items-center gap-4">
+      <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-8 lg:right-12 z-20 flex items-center gap-2 sm:gap-4">
         {/* Next Slide Previews / Thumbnails (Laptop & Desktop) */}
         <div className="hidden xl:flex items-center gap-2 bg-black/60 backdrop-blur-md p-1.5 rounded-2xl border border-white/10">
           {slides.map((slide, idx) => {
@@ -255,7 +271,6 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
                 key={slide.id}
                 type="button"
                 onClick={() => {
-                  setSlideDirection(idx > activeSlide ? "next" : "prev");
                   setActiveSlide(idx);
                 }}
                 className={`relative w-14 h-9 rounded-lg overflow-hidden border transition-all duration-300 cursor-pointer ${
@@ -285,7 +300,6 @@ export default function HeroMontage({ movies = [] }: HeroMontageProps) {
                 key={i}
                 type="button"
                 onClick={() => {
-                  setSlideDirection(i > activeSlide ? "next" : "prev");
                   setActiveSlide(i);
                 }}
                 className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${

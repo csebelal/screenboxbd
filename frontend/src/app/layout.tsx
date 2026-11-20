@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope, Space_Grotesk } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import AnnouncementRibbon from "@/components/layout/AnnouncementRibbon";
 import Footer from "@/components/layout/Footer";
 import BackToTop from "@/components/layout/BackToTop";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -20,15 +21,18 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#0B0C0E",
+};
+
 export const metadata: Metadata = {
   title: "ScreenBoxBD - Premium BDIX Cinema & Live TV Streaming",
   description:
     "ScreenBoxBD is Bangladesh's premier OTT streaming platform for watching your favorite blockbusters, TV shows, and bufferless 1080p Live TV channels on demand with BDIX ultra speed.",
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
-  },
 };
 
 export default function RootLayout({
@@ -38,14 +42,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`dark ${manrope.variable} ${spaceGrotesk.variable}`}>
-      <body className="min-h-screen bg-[#0B0C0E] text-white flex flex-col selection:bg-[#E50000] selection:text-white font-sans antialiased">
+      <body className="min-h-screen bg-[#0B0C0E] text-white flex flex-col selection:bg-[#E50000] selection:text-white font-sans antialiased overflow-x-hidden">
         <AnnouncementRibbon />
         <Navbar />
-        <main className="flex-1 w-full">
+        <main className="flex-1 w-full pb-16 md:pb-0">
           {children}
         </main>
         <Footer />
         <BackToTop />
+        <MobileBottomNav />
       </body>
     </html>
   );

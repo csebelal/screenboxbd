@@ -16,3 +16,4 @@ backend/public/storage
 backend/public/hot
 .phpunit.result.cache
 *.log
+m3u file/

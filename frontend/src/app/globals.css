@@ -45,6 +45,22 @@ body {
   padding: 0;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* iOS Safe Area & Mobile Touch Utilities */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+}
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top), 1rem);
+}
+
+/* Touch-optimized horizontal momentum scroll */
+.touch-pan-x {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
 }
 
 /* Custom Streamit Scrollbar */
@@ -142,23 +158,14 @@ body {
   box-shadow: 0 0 15px rgba(229, 0, 0, 0.15);
 }
 
-/* Bulletproof player container */
+/* Bulletproof player container - True 16:9 Responsive Aspect Ratio */
 .artplayer-wrapper {
   position: relative;
   width: 100%;
+  height: 100%;
   aspect-ratio: 16 / 9;
-  min-height: 380px;
   background-color: #000;
-  border-radius: 1rem;
   overflow: hidden;
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
-}
-
-@media (min-width: 768px) {
-  .artplayer-wrapper {
-    min-height: 480px;
-  }
 }
 
 .artplayer-app {
@@ -167,6 +174,22 @@ body {
   width: 100% !important;
   height: 100% !important;
   background-color: #000;
+  overflow: hidden;
+}
+
+/* Ensure video in live stream cleanly fills 16:9 viewport edge-to-edge without letterboxing */
+.artplayer-app .art-video-player,
+.artplayer-app .art-video-player video,
+.artplayer-app .art-video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* In fullscreen mode, prevent video distortion while preserving natural contain */
+:fullscreen .artplayer-app .art-video,
+:-webkit-full-screen .artplayer-app .art-video {
+  object-fit: contain !important;
 }
 
 /* Pulse animation for Live indicator */

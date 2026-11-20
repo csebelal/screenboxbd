@@ -496,8 +496,8 @@ export async function getPlatformSettings(): Promise<PlatformSettings> {
   return {
     site_name: "ScreenBoxBD",
     site_tagline: "BDIX আল্ট্রা-ফাস্ট লাইভ টিভি ও প্রিমিয়াম মুভি স্ট্রিমিং",
-    announcement_active: true,
-    announcement_text: "🔥 নতুন আপডেট: BDIX 4K সার্ভার যুক্ত হয়েছে! কোনো প্রকার বাফারিং ছাড়াই সমস্ত খেলা ও মুভি উপভোগ করুন।",
+    announcement_active: false,
+    announcement_text: "",
     announcement_color: "emerald",
     announcement_link: "/subscriptions",
     support_email: "support@screenboxbd.com",

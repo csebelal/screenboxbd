@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus, Star, X, Check, ThumbsUp, MessageSquare } from "lucide-react";
 
 interface Review {
@@ -26,7 +26,7 @@ export default function ReviewSection({
   genres = [],
 }: ReviewSectionProps) {
   // Generate title-specific and genre-aware community reviews
-  const buildInitialReviews = (): Review[] => {
+  const buildInitialReviews = useCallback((): Review[] => {
     const isActionOrSciFi = genres.some((g) =>
       /action|sci-fi|adventure|fantasy/i.test(g)
     );
@@ -73,7 +73,7 @@ export default function ReviewSection({
         likes: 42,
       },
     ];
-  };
+  }, [genres, movieRating, movieTitle]);
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -99,7 +99,7 @@ export default function ReviewSection({
       // Fallback
     }
     setReviews(initial);
-  }, [movieSlug, movieTitle]);
+  }, [movieSlug, buildInitialReviews]);
 
   const handleAddReview = (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,16 +213,16 @@ export default function ReviewSection({
 
       {/* Interactive Review Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
           <div
-            className="w-full max-w-lg bg-[#12141C] border border-white/10 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative"
+            className="w-full max-w-lg bg-[#12141C] border border-white/10 rounded-3xl p-5 sm:p-8 space-y-5 sm:space-y-6 shadow-2xl relative max-h-[calc(100dvh-2rem)] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3 sm:pb-4">
               <div className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-[#E50000]" />
-                <h3 className="text-lg font-black text-white">Review {movieTitle}</h3>
+                <h3 className="text-base sm:text-lg font-black text-white truncate max-w-[240px] sm:max-w-md">Review {movieTitle}</h3>
               </div>
               <button
                 type="button"

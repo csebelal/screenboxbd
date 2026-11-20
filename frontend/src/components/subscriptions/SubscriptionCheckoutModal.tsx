@@ -53,8 +53,8 @@ export default function SubscriptionCheckoutModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg rounded-2xl bg-[#13151D] border border-white/10 shadow-2xl p-6 sm:p-8 overflow-hidden text-left">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg rounded-2xl bg-[#13151D] border border-white/10 shadow-2xl p-5 sm:p-8 max-h-[calc(100dvh-2rem)] overflow-y-auto text-left">
         {/* Glow decorative */}
         <div className="absolute top-0 right-0 w-48 h-48 bg-red-600/15 rounded-full blur-3xl pointer-events-none" />
 
@@ -62,9 +62,10 @@ export default function SubscriptionCheckoutModal({
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/[0.05] text-[#9EA3B0] hover:text-white hover:bg-white/[0.1] transition cursor-pointer"
+          className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 w-9 h-9 rounded-full bg-white/[0.08] hover:bg-white/[0.15] text-[#9EA3B0] hover:text-white flex items-center justify-center transition cursor-pointer z-10"
+          aria-label="Close dialog"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4 stroke-[2.5]" />
         </button>
 
         {isSuccess ? (

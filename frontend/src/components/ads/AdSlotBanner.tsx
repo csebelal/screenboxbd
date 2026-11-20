@@ -6,13 +6,11 @@ import { AdSlot } from "@/types";
 interface AdSlotBannerProps {
   slot?: AdSlot | null;
   className?: string;
-  fallbackLabel?: string;
 }
 
 export default function AdSlotBanner({
   slot,
   className = "",
-  fallbackLabel,
 }: AdSlotBannerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -34,15 +32,6 @@ export default function AdSlotBanner({
   }, [slot]);
 
   if (!slot) {
-    if (fallbackLabel) {
-      return (
-        <div
-          className={`flex items-center justify-center p-4 rounded-xl border border-dashed border-zinc-800 bg-zinc-950/40 text-xs text-zinc-600 ${className}`}
-        >
-          <span>{fallbackLabel}</span>
-        </div>
-      );
-    }
     return null;
   }
 

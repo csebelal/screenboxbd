@@ -149,7 +149,7 @@ export default function FullWidthMovieRail({
                   className={`btn-tactile absolute top-2 right-2 z-20 w-7 h-7 rounded-lg backdrop-blur-md border transition-all duration-200 flex items-center justify-center cursor-pointer active:scale-90 ${
                     isBookmarked
                       ? "bg-[#E50000] border-red-500 text-white opacity-100 shadow-md shadow-red-900/60"
-                      : "bg-black/60 border-white/20 text-white/80 hover:text-white hover:bg-red-600 opacity-0 group-hover/card:opacity-100"
+                      : "bg-black/60 border-white/20 text-white/80 hover:text-white hover:bg-red-600 opacity-90 sm:opacity-0 sm:group-hover/card:opacity-100"
                   }`}
                   title={isBookmarked ? "In Watchlist" : "Add to Watchlist"}
                 >
