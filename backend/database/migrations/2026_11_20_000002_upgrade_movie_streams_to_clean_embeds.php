@@ -13,20 +13,34 @@ return new class extends Migration
     {
         if (Schema::hasTable('movie_streams')) {
             // 1. Upgrade vidsrc.to (ad-heavy with reCAPTCHA) to vidlink.pro (ad-free clean)
-            DB::statement("
-                UPDATE movie_streams 
-                SET server_name = 'VidLink VIP (Ad-Free)',
-                    stream_url = REPLACE(stream_url, 'https://vidsrc.to/embed/movie/', 'https://vidlink.pro/movie/')
-                WHERE stream_url LIKE '%vidsrc.to/embed/movie/%'
-            ");
+            DB::table('movie_streams')
+                ->where('stream_url', 'like', '%vidsrc.to/embed/movie/%')
+                ->get()
+                ->each(function ($stream) {
+                    DB::table('movie_streams')
+                        ->where('id', $stream->id)
+                        ->update([
+                            'server_name' => 'VidLink VIP (Ad-Free)',
+                            'stream_url' => str_replace('https://vidsrc.to/embed/movie/', 'https://vidlink.pro/movie/', $stream->stream_url),
+                        ]);
+                });
 
             // 2. Upgrade multiembed.mov to embed.su
-            DB::statement("
-                UPDATE movie_streams 
-                SET server_name = 'Embed.su (Multi-Source CDN)',
-                    stream_url = CONCAT('https://embed.su/embed/movie/', SUBSTRING_INDEX(SUBSTRING_INDEX(stream_url, 'video_id=', -1), '&', 1))
-                WHERE stream_url LIKE '%multiembed.mov%'
-            ");
+            DB::table('movie_streams')
+                ->where('stream_url', 'like', '%multiembed.mov%')
+                ->get()
+                ->each(function ($stream) {
+                    parse_str(parse_url($stream->stream_url, PHP_URL_QUERY) ?? '', $queryParams);
+                    $videoId = $queryParams['video_id'] ?? null;
+                    if ($videoId) {
+                        DB::table('movie_streams')
+                            ->where('id', $stream->id)
+                            ->update([
+                                'server_name' => 'Embed.su (Multi-Source CDN)',
+                                'stream_url' => 'https://embed.su/embed/movie/' . $videoId,
+                            ]);
+                    }
+                });
         }
     }
 
