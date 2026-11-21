@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { PlatformSettings } from "@/types";
@@ -9,6 +9,7 @@ declare global {
   interface Window {
     dataLayer: unknown[];
     gtag?: (...args: unknown[]) => void;
+    [key: string]: unknown;
   }
 }
 
@@ -16,8 +17,27 @@ interface GoogleAnalyticsProps {
   settings: PlatformSettings;
 }
 
+/**
+ * Checks if the current hostname is localhost or a private local network IP
+ */
+function isLocalOrPrivateHost(hostname: string): boolean {
+  if (!hostname) return true;
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1" ||
+    hostname.startsWith("192.168.") ||
+    hostname.startsWith("10.") ||
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname) ||
+    hostname.endsWith(".local") ||
+    hostname.endsWith(".test") ||
+    hostname.endsWith(".internal")
+  );
+}
+
 export default function GoogleAnalytics({ settings }: GoogleAnalyticsProps) {
   const pathname = usePathname();
+  const [isProduction, setIsProduction] = useState<boolean>(false);
 
   // If tracking is explicitly disabled in the Admin Panel, do not load any scripts
   const isEnabled = settings?.google_analytics_enabled !== false;
@@ -26,9 +46,25 @@ export default function GoogleAnalytics({ settings }: GoogleAnalyticsProps) {
   const customHeader = (settings?.custom_header_scripts || "").trim();
   const customFooter = (settings?.custom_footer_scripts || "").trim();
 
-  // Track client-side SPA route navigations in Google Analytics / GTM
+  // Determine if running on live production domain vs localhost/LAN IP
   useEffect(() => {
-    if (!isEnabled || !pathname) return;
+    if (typeof window !== "undefined") {
+      const isLocal = isLocalOrPrivateHost(window.location.hostname);
+      if (isLocal) {
+        // Opt-out and disable tracking on localhost and local network IPs (e.g. 192.168.0.150)
+        if (gaId) {
+          window[`ga-disable-${gaId}`] = true;
+        }
+        setIsProduction(false);
+      } else {
+        setIsProduction(true);
+      }
+    }
+  }, [gaId]);
+
+  // Track client-side SPA route navigations in Google Analytics / GTM ONLY on production
+  useEffect(() => {
+    if (!isEnabled || !isProduction || !pathname) return;
 
     if (typeof window !== "undefined" && window.dataLayer) {
       window.dataLayer.push({
@@ -38,9 +74,10 @@ export default function GoogleAnalytics({ settings }: GoogleAnalyticsProps) {
         page_title: document.title,
       });
     }
-  }, [pathname, isEnabled]);
+  }, [pathname, isEnabled, isProduction]);
 
-  if (!isEnabled) {
+  // If analytics is disabled in admin OR the current host is local/private network, DO NOT load scripts
+  if (!isEnabled || !isProduction) {
     return null;
   }
 
@@ -49,7 +86,7 @@ export default function GoogleAnalytics({ settings }: GoogleAnalyticsProps) {
       {/* 1. Google Tag Manager (GTM) Primary Container */}
       {gtmId && (
         <>
-          {/* Main GTM Script as specified */}
+          {/* Main GTM Script */}
           <Script
             id="gtm-script"
             strategy="afterInteractive"
