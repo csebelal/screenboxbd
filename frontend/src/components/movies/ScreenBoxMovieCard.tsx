@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Movie } from "@/types";
 import { Clock, Eye, Star, Play, Bookmark, Check } from "lucide-react";
+import { sanitizePosterUrl } from "@/lib/imageUtils";
 
 interface ScreenBoxMovieCardProps {
   movie: Movie;
@@ -38,7 +39,7 @@ export default function ScreenBoxMovieCard({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={
-            movie.poster_url ||
+            sanitizePosterUrl(movie.poster_url) ||
             "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=400&q=80"
           }
           alt={movie.title}

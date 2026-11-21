@@ -4,6 +4,7 @@ import { useRef } from "react";
 import Link from "next/link";
 import { Movie } from "@/types";
 import { Flame, Star, Play, ChevronLeft, ChevronRight } from "lucide-react";
+import { sanitizePosterUrl } from "@/lib/imageUtils";
 
 interface Top10RailProps {
   movies: Movie[];
@@ -88,10 +89,10 @@ export default function Top10Rail({
 
                 {/* Poster Card */}
                 <div className="relative w-36 sm:w-44 aspect-[2/3] rounded-2xl overflow-hidden bg-[#12141C] border border-white/[0.08] group-hover/card:border-red-600/60 shadow-2xl shadow-black/80 z-10">
-                  {movie.poster_url ? (
+                  {sanitizePosterUrl(movie.poster_url) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={movie.poster_url}
+                      src={sanitizePosterUrl(movie.poster_url)!}
                       alt={movie.title}
                       loading="lazy"
                       className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500 ease-out"

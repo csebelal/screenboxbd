@@ -226,7 +226,7 @@ class BulkImportBdixMoviesCommand extends Command
                             'overview' => "{$cleanTitle} ({$year}) - {$cfg['name']} in full 1080p BDIX high-speed stream.",
                             'release_date' => "{$year}-01-01",
                             'rating' => 7.5,
-                            'poster_url' => $posterUrl,
+                            'poster_url' => (!empty($posterUrl) && !str_contains($posterUrl, '172.16.') && !str_contains($posterUrl, '192.168.')) ? $posterUrl : null,
                             'genres' => $cfg['genres'],
                             'is_published' => true,
                             'is_featured' => true,

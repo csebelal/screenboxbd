@@ -158,7 +158,7 @@ class ImportTopImdbCommand extends Command
                         'overview' => "{$cleanTitle} (" . ($year ?: 'Top Rated') . ") - Part of the IMDb Top 250 all-time best movies collection, available in 1080p BDIX high speed.",
                         'release_date' => ($year ?: 2000) . '-01-01',
                         'rating' => 8.8,
-                        'poster_url' => $posterUrl,
+                        'poster_url' => (!empty($posterUrl) && !str_contains($posterUrl, '172.16.') && !str_contains($posterUrl, '192.168.')) ? $posterUrl : null,
                         'genres' => ['Top IMDb', 'Drama'],
                         'is_published' => true,
                         'is_featured' => true,

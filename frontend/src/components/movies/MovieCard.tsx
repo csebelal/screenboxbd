@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Movie } from "@/types";
 import { Star, Play, Film, Clock } from "lucide-react";
+import { sanitizePosterUrl } from "@/lib/imageUtils";
 
 interface MovieCardProps {
   movie: Movie;
@@ -11,6 +12,7 @@ interface MovieCardProps {
 
 export default function MovieCard({ movie }: MovieCardProps) {
   const durationText = movie.duration_minutes ? `${movie.duration_minutes}m` : null;
+  const posterUrl = sanitizePosterUrl(movie.poster_url);
 
   return (
     <Link
@@ -19,10 +21,10 @@ export default function MovieCard({ movie }: MovieCardProps) {
     >
       {/* Poster Image Container */}
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#0D0E12]">
-        {movie.poster_url ? (
+        {posterUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={movie.poster_url}
+            src={posterUrl}
             alt={movie.title}
             loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"

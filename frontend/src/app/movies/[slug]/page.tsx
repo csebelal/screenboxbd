@@ -7,6 +7,7 @@ import MetadataSidebar from "@/components/movies/MetadataSidebar";
 import ScreenBoxMovieCard from "@/components/movies/ScreenBoxMovieCard";
 import Link from "next/link";
 import { Play, Plus, ThumbsUp, ArrowLeft, Download, Star } from "lucide-react";
+import { sanitizePosterUrl } from "@/lib/imageUtils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -75,8 +76,8 @@ export default async function MovieWatchPage({ params }: PageProps) {
           <div className="rounded-3xl overflow-hidden border border-white/10 bg-black shadow-2xl shadow-black/90">
             <MoviePlayer
               streams={streams}
-              posterUrl={movie.poster_url}
-              backdropUrl={movie.backdrop_url}
+              posterUrl={sanitizePosterUrl(movie.poster_url) || undefined}
+              backdropUrl={sanitizePosterUrl(movie.backdrop_url) || undefined}
               movieTitle={movie.title}
             />
           </div>
@@ -84,7 +85,7 @@ export default async function MovieWatchPage({ params }: PageProps) {
           <div className="relative aspect-[16/9] sm:aspect-[21/9] max-h-[520px] rounded-3xl overflow-hidden border border-white/10 bg-[#0B0C0E] shadow-2xl shadow-black/80">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={movie.backdrop_url || movie.poster_url || undefined}
+              src={sanitizePosterUrl(movie.backdrop_url) || sanitizePosterUrl(movie.poster_url) || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1920&q=80"}
               alt={movie.title}
               className="w-full h-full object-cover filter brightness-[0.7]"
             />
