@@ -92,6 +92,14 @@
                 <span style="font-size: 0.825rem; font-weight: 600; color: #f4f4f5;">Platform Settings</span>
                 <span style="font-size: 0.7rem; color: #a1a1aa;">Site & SEO Config</span>
             </a>
+
+            <a href="{{ url('/admin/google-analytics-settings') }}" style="display: flex; flex-direction: column; align-items: center; padding: 14px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); text-decoration: none; transition: all 0.2s;">
+                <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(234,179,8,0.15); display: flex; align-items: center; justify-content: center; color: #eab308; margin-bottom: 8px;">
+                    <x-filament::icon icon="heroicon-o-chart-bar" style="width: 20px; height: 20px;" />
+                </div>
+                <span style="font-size: 0.825rem; font-weight: 600; color: #f4f4f5;">Analytics & GTM</span>
+                <span style="font-size: 0.7rem; color: #a1a1aa;">Google Tag Manager</span>
+            </a>
         </div>
     </x-filament::section>
 </div>

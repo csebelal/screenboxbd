@@ -32,6 +32,7 @@ class SettingForm
                         'contact' => 'Contact & Social Communities',
                         'monetization' => 'Monetization & Billing',
                         'seo' => 'SEO & Social Metadata',
+                        'analytics' => 'Analytics & Tracking (Google Analytics / GTM)',
                     ])
                     ->required()
                     ->default('general'),

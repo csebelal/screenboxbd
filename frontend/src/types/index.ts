@@ -237,6 +237,12 @@ export interface PlatformSettings {
   player_default_quality?: string;
   meta_title?: string;
   meta_description?: string;
+  enable_subscriptions?: boolean;
+  google_analytics_enabled?: boolean;
+  google_tag_manager_id?: string;
+  google_analytics_id?: string;
+  custom_header_scripts?: string;
+  custom_footer_scripts?: string;
   [key: string]: string | number | boolean | null | undefined;
 }
 

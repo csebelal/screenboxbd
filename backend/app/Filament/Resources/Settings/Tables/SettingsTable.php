@@ -39,6 +39,7 @@ class SettingsTable
                         'contact' => 'info',
                         'monetization' => 'warning',
                         'seo' => 'purple',
+                        'analytics' => 'amber',
                         default => 'gray',
                     })
                     ->sortable(),
@@ -78,6 +79,7 @@ class SettingsTable
                         'contact' => 'Contact & Social Communities',
                         'monetization' => 'Monetization & Billing',
                         'seo' => 'SEO & Social Metadata',
+                        'analytics' => 'Analytics & Tracking (Google Analytics / GTM)',
                     ]),
             ])
             ->actions([

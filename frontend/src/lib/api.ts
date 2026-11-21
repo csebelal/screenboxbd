@@ -511,6 +511,12 @@ export async function getPlatformSettings(): Promise<PlatformSettings> {
     support_telegram: "https://t.me/screenboxbd",
     support_whatsapp: "https://wa.me/8801700000000",
     support_facebook: "https://facebook.com/screenboxbd",
+    enable_subscriptions: false,
+    google_analytics_enabled: true,
+    google_tag_manager_id: "GTM-T4M9PSPK",
+    google_analytics_id: "",
+    custom_header_scripts: "",
+    custom_footer_scripts: "",
   };
 }
 
