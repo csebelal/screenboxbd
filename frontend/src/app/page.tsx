@@ -14,6 +14,7 @@ export const revalidate = 30; // ISR revalidate every 30 seconds
 export default async function HomePage() {
   // Attempt single-query aggregated home payload first for maximum speed
   const homeData = await getHomeData();
+  const showSubscriptions = Boolean(homeData?.settings?.enable_subscriptions);
 
   let heroMovies = homeData?.hero || [];
   let channels = homeData?.featured_channels || [];
@@ -172,8 +173,8 @@ export default async function HomePage() {
       {/* 12. Frequently Asked Questions Numbered Accordion */}
       <FaqAccordion />
 
-      {/* 13. Choose The Plan That's Right For You */}
-      <PricingSection />
+      {/* 13. Choose The Plan That's Right For You (Admin controlled) */}
+      {showSubscriptions && <PricingSection />}
     </div>
   );
 }

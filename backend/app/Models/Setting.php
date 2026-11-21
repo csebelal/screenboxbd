@@ -31,10 +31,12 @@ class Setting extends Model
     {
         static::saved(function () {
             Cache::forget('app_public_settings');
+            Cache::forget('api_home_payload');
         });
 
         static::deleted(function () {
             Cache::forget('app_public_settings');
+            Cache::forget('api_home_payload');
         });
     }
 

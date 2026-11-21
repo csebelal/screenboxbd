@@ -169,6 +169,7 @@ class HomeController extends Controller
                 'popular_series' => SeriesResource::collection($popularSeries),
                 'featured_channels' => ChannelResource::collection($featuredChannels),
                 'categories' => CategoryResource::collection($categories),
+                'settings' => \App\Models\Setting::getAllPublic(),
             ];
         });
 

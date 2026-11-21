@@ -21,7 +21,11 @@ import {
 import ScreenBoxLogo from "./ScreenBoxLogo";
 
 
-export default function Navbar() {
+interface NavbarProps {
+  enableSubscriptions?: boolean;
+}
+
+export default function Navbar({ enableSubscriptions = false }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -49,7 +53,7 @@ export default function Navbar() {
     { label: "Home", href: "/" },
     { label: "Movies & Shows", href: "/movies" },
     { label: "Live TV", href: "/tv" },
-    { label: "Subscriptions", href: "/subscriptions" },
+    ...(enableSubscriptions ? [{ label: "Subscriptions", href: "/subscriptions" }] : []),
     { label: "Blog", href: "/blog" },
     { label: "Support", href: "/support" },
   ];
@@ -325,14 +329,16 @@ export default function Navbar() {
                   </div>
 
                   <div className="space-y-1">
-                    <Link
-                      href="/subscriptions"
-                      onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#E2E4E9] hover:bg-white/[0.05] rounded-xl transition"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-[#E50000]" />
-                      <span>Manage Subscription</span>
-                    </Link>
+                    {enableSubscriptions && (
+                      <Link
+                        href="/subscriptions"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-[#E2E4E9] hover:bg-white/[0.05] rounded-xl transition"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-[#E50000]" />
+                        <span>Manage Subscription</span>
+                      </Link>
+                    )}
                     <Link
                       href="/movies?tab=movies"
                       onClick={() => setProfileOpen(false)}

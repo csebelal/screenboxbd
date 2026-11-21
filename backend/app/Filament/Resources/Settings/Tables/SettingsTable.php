@@ -45,6 +45,19 @@ class SettingsTable
 
                 TextColumn::make('value')
                     ->label('Current Value')
+                    ->formatStateUsing(function ($state, $record) {
+                        if ($record->type === 'boolean') {
+                            return filter_var($state, FILTER_VALIDATE_BOOLEAN)
+                                ? '✅ Enabled / Active'
+                                : '❌ Disabled / Hidden';
+                        }
+                        return $state;
+                    })
+                    ->badge(fn ($record) => $record->type === 'boolean')
+                    ->color(fn ($record) => $record->type === 'boolean'
+                        ? (filter_var($record->value, FILTER_VALIDATE_BOOLEAN) ? 'success' : 'danger')
+                        : 'gray'
+                    )
                     ->limit(45)
                     ->tooltip(fn ($record) => $record->value),
 
@@ -68,6 +81,21 @@ class SettingsTable
                     ]),
             ])
             ->actions([
+                \Filament\Actions\Action::make('toggle_boolean')
+                    ->label(fn ($record) => filter_var($record->value, FILTER_VALIDATE_BOOLEAN) ? 'Turn OFF (হাইড করুন)' : 'Turn ON (শো করুন)')
+                    ->icon(fn ($record) => filter_var($record->value, FILTER_VALIDATE_BOOLEAN) ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
+                    ->color(fn ($record) => filter_var($record->value, FILTER_VALIDATE_BOOLEAN) ? 'danger' : 'success')
+                    ->visible(fn ($record) => $record->type === 'boolean')
+                    ->action(function ($record) {
+                        $current = filter_var($record->value, FILTER_VALIDATE_BOOLEAN);
+                        $record->update(['value' => $current ? '0' : '1']);
+                        \Illuminate\Support\Facades\Cache::forget('app_public_settings');
+                        \Illuminate\Support\Facades\Cache::forget('api_home_payload');
+                        \Filament\Notifications\Notification::make()
+                            ->title($record->label . ($current ? ' Disabled (এখন সাইট থেকে লুকানো)' : ' Enabled (এখন সাইটে দৃশ্যমান)'))
+                            ->success()
+                            ->send();
+                    }),
                 EditAction::make(),
             ])
             ->bulkActions([

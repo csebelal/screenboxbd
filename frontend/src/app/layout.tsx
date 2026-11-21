@@ -4,6 +4,7 @@ import AnnouncementRibbon from "@/components/layout/AnnouncementRibbon";
 import Footer from "@/components/layout/Footer";
 import BackToTop from "@/components/layout/BackToTop";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
+import { getPlatformSettings } from "@/lib/api";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -20,22 +21,25 @@ export const metadata: Metadata = {
     "ScreenBoxBD is Bangladesh's premier OTT streaming platform for watching your favorite blockbusters, TV shows, and bufferless 1080p Live TV channels on demand with BDIX ultra speed.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getPlatformSettings();
+  const enableSubscriptions = Boolean(settings?.enable_subscriptions);
+
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen bg-[#0B0C0E] text-white flex flex-col selection:bg-[#E50000] selection:text-white font-sans antialiased overflow-x-hidden">
         <AnnouncementRibbon />
-        <Navbar />
+        <Navbar enableSubscriptions={enableSubscriptions} />
         <main className="flex-1 w-full pb-16 md:pb-0">
           {children}
         </main>
-        <Footer />
+        <Footer enableSubscriptions={enableSubscriptions} />
         <BackToTop />
-        <MobileBottomNav />
+        <MobileBottomNav enableSubscriptions={enableSubscriptions} />
       </body>
     </html>
   );

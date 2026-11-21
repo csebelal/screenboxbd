@@ -4,9 +4,10 @@ import { ShieldCheck, Wifi, Award } from "lucide-react";
 
 interface FooterProps {
   showCta?: boolean;
+  enableSubscriptions?: boolean;
 }
 
-export default function Footer({}: FooterProps) {
+export default function Footer({ enableSubscriptions = false }: FooterProps) {
   const footerSections = [
     {
       title: "Discover",
@@ -28,15 +29,19 @@ export default function Footer({}: FooterProps) {
         { label: "Frequently Asked Questions", href: "/#faq" },
       ],
     },
-    {
-      title: "Membership",
-      links: [
-        { label: "Subscription Plans", href: "/subscriptions" },
-        { label: "Plan Comparison Matrix", href: "/subscriptions#compare" },
-        { label: "7-Day Free Trial", href: "/subscriptions" },
-        { label: "VIP 4K Ultra Access", href: "/subscriptions" },
-      ],
-    },
+    ...(enableSubscriptions
+      ? [
+          {
+            title: "Membership",
+            links: [
+              { label: "Subscription Plans", href: "/subscriptions" },
+              { label: "Plan Comparison Matrix", href: "/subscriptions#compare" },
+              { label: "7-Day Free Trial", href: "/subscriptions" },
+              { label: "VIP 4K Ultra Access", href: "/subscriptions" },
+            ],
+          },
+        ]
+      : []),
     {
       title: "Support & Legal",
       links: [

@@ -111,6 +111,7 @@ export interface HomePayload {
   popular_series: Series[];
   featured_channels: Channel[];
   categories: Category[];
+  settings?: PlatformSettings;
 }
 
 /**

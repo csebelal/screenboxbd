@@ -48,11 +48,22 @@ class SettingForm
                     ->required()
                     ->default('text'),
 
+                Select::make('value')
+                    ->label('Boolean Value (চালু / বন্ধ)')
+                    ->options([
+                        '1' => '✅ Enabled / Active (সক্রিয় - সাইটে দেখাবে)',
+                        '0' => '❌ Disabled / Hidden (নিষ্ক্রিয় - সাইট থেকে লুকানো থাকবে)',
+                    ])
+                    ->visible(fn ($get) => $get('type') === 'boolean')
+                    ->columnSpanFull()
+                    ->default('0'),
+
                 Textarea::make('value')
                     ->label('Current Value')
                     ->rows(4)
                     ->columnSpanFull()
-                    ->placeholder('Enter value for this setting'),
+                    ->placeholder('Enter value for this setting')
+                    ->visible(fn ($get) => $get('type') !== 'boolean'),
 
                 Textarea::make('description')
                     ->label('Admin Hint / Description')

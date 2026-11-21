@@ -4,7 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Film, Tv, Sparkles, Search } from "lucide-react";
 
-export default function MobileBottomNav() {
+interface MobileBottomNavProps {
+  enableSubscriptions?: boolean;
+}
+
+export default function MobileBottomNav({ enableSubscriptions = false }: MobileBottomNavProps) {
   const pathname = usePathname();
 
   // Trigger global search modal if available
@@ -37,12 +41,16 @@ export default function MobileBottomNav() {
       isLive: true,
       exact: false,
     },
-    {
-      label: "Plans",
-      href: "/subscriptions",
-      icon: Sparkles,
-      exact: false,
-    },
+    ...(enableSubscriptions
+      ? [
+          {
+            label: "Plans",
+            href: "/subscriptions",
+            icon: Sparkles,
+            exact: false,
+          },
+        ]
+      : []),
   ];
 
   const isActive = (href: string, exact: boolean) => {
@@ -55,7 +63,7 @@ export default function MobileBottomNav() {
       aria-label="Mobile Navigation"
       className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[#0B0C0E]/95 backdrop-blur-2xl border-t border-white/[0.08] shadow-[0_-8px_30px_rgba(0,0,0,0.8)] pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1.5 transition-all duration-300"
     >
-      <div className="grid grid-cols-5 items-center justify-around h-14 max-w-md mx-auto px-1">
+      <div className={`grid ${enableSubscriptions ? "grid-cols-5" : "grid-cols-4"} items-center justify-around h-14 max-w-md mx-auto px-1`}>
         {navItems.slice(0, 2).map((item) => {
           const active = isActive(item.href, item.exact);
           const Icon = item.icon;
@@ -115,8 +123,9 @@ export default function MobileBottomNav() {
         })()}
 
         {/* Subscriptions */}
-        {(() => {
+        {enableSubscriptions && (() => {
           const planItem = navItems[3];
+          if (!planItem) return null;
           const active = isActive(planItem.href, planItem.exact);
           const Icon = planItem.icon;
           return (

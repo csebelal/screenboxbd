@@ -1,4 +1,6 @@
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getPlatformSettings } from "@/lib/api";
 import SubscriptionsHeroBanner from "@/components/subscriptions/SubscriptionsHeroBanner";
 import PricingSection from "@/components/home/PricingSection";
 import PaymentPartnersBanner from "@/components/subscriptions/PaymentPartnersBanner";
@@ -12,7 +14,12 @@ export const metadata: Metadata = {
     "ScreenBoxBD সাবস্ক্রিপশন প্ল্যানসমূহ: বেসিক HD (৳১৪৯), স্ট্যান্ডার্ড ১০৮০p (৳২৯৯) এবং প্রিমিয়াম ৪কে ভিআইপি (৳৪৯৯)। বিকাশ, নগদ বা কার্ডে পেমেন্ট, বাফারলেস BDIX স্ট্রিমিং ও ৭ দিনের গ্যারান্টি।",
 };
 
-export default function SubscriptionsPage() {
+export default async function SubscriptionsPage() {
+  const settings = await getPlatformSettings();
+  if (!settings?.enable_subscriptions) {
+    redirect("/");
+  }
+
   return (
     <div className="py-4 space-y-8 sm:space-y-12 pb-20 w-full overflow-x-hidden">
       {/* 1. Subscriptions Hero Banner */}
