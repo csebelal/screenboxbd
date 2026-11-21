@@ -10,10 +10,15 @@ use Illuminate\Http\Request;
 class MovieController extends Controller
 {
     /**
-     * Paginated movies list with genre, search, and sorting filters.
+     * Paginated movies list with smart genre, search, language, quality, and sorting filters.
      */
     public function index(Request $request)
     {
+        // 1. Single-query aggregated catalog endpoint for /movies page
+        if ($request->boolean('catalog')) {
+            return $this->catalog();
+        }
+
         $cacheKey = 'movies_index_' . md5($request->fullUrl());
         
         return \Illuminate\Support\Facades\Cache::remember($cacheKey, 60, function () use ($request) {
@@ -23,92 +28,367 @@ class MovieController extends Controller
                 $query->with('streams');
             }
 
-        if ($request->filled('genre')) {
-            $genre = $request->query('genre');
-            $genreLower = strtolower($genre);
-            if ($genreLower === 'bangla-ott' || $genreLower === 'bangla ott') {
-                $query->where(function ($q) {
-                    $q->whereIn('ott_platform', ['chorki', 'hoichoi', 'toffee', 'bongo', 'bioscope', 'binge', 'youtube', 'deeptoplay', 'cinemawala', 'cmv'])
-                      ->orWhereJsonContains('genres', 'Bangla OTT')
-                      ->orWhereJsonContains('genres', 'Bangla Natok');
-                });
-            } elseif (in_array($genreLower, ['natok', 'bangla-natok', 'bangla natok', 'telefilm'])) {
-                $query->where(function ($q) {
-                    $q->whereJsonContains('genres', 'Bangla Natok')
-                      ->orWhereJsonContains('genres', 'Natok')
-                      ->orWhereJsonContains('genres', 'Telefilm')
-                      ->orWhere('title', 'LIKE', '%Natok%')
-                      ->orWhere('title', 'LIKE', '%নাটক%');
-                });
-            } else {
-                $query->whereJsonContains('genres', $genre);
+            // Smart Genre Matching
+            if ($request->filled('genre')) {
+                $genre = trim($request->query('genre'));
+                $genreLower = strtolower($genre);
+
+                if ($genreLower === 'bangla-ott' || $genreLower === 'bangla ott') {
+                    $query->where(function ($q) {
+                        $q->whereIn('ott_platform', ['chorki', 'hoichoi', 'toffee', 'bongo', 'bioscope', 'binge', 'youtube', 'deeptoplay', 'cinemawala', 'cmv'])
+                          ->orWhereJsonContains('genres', 'Bangla OTT')
+                          ->orWhereJsonContains('genres', 'Bangla Natok');
+                    });
+                } elseif (in_array($genreLower, ['natok', 'bangla-natok', 'bangla natok', 'telefilm'])) {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('genres', 'Bangla Natok')
+                          ->orWhereJsonContains('genres', 'Natok')
+                          ->orWhereJsonContains('genres', 'Telefilm')
+                          ->orWhere('title', 'LIKE', '%Natok%')
+                          ->orWhere('title', 'LIKE', '%নাটক%');
+                    });
+                } elseif (in_array($genreLower, ['bangla', 'bangla cinema', 'kolkata bangla', 'bengali'])) {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('genres', 'Bangla Cinema')
+                          ->orWhereJsonContains('genres', 'Kolkata Bangla')
+                          ->orWhereJsonContains('genres', 'Bangla')
+                          ->orWhereJsonContains('genres', 'Bangla OTT')
+                          ->orWhereJsonContains('languages', 'Bengali')
+                          ->orWhere('title', 'LIKE', '%Bangla%')
+                          ->orWhere('overview', 'LIKE', '%Bangla%')
+                          ->orWhere('overview', 'LIKE', '%Kolkata%');
+                    });
+                } elseif (in_array($genreLower, ['sci-fi & fantasy', 'sci-fi and fantasy', 'sci-fi', 'scifi', 'science fiction', 'fantasy'])) {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('genres', 'Science Fiction')
+                          ->orWhereJsonContains('genres', 'Fantasy')
+                          ->orWhereJsonContains('genres', 'Sci-Fi')
+                          ->orWhereJsonContains('genres', 'Sci-Fi & Fantasy');
+                    });
+                } elseif (in_array($genreLower, ['crime & mystery', 'crime and mystery', 'crime', 'mystery'])) {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('genres', 'Crime')
+                          ->orWhereJsonContains('genres', 'Mystery')
+                          ->orWhereJsonContains('genres', 'Crime & Mystery');
+                    });
+                } elseif (in_array($genreLower, ['box office hits', 'box office', 'box-office', 'blockbuster'])) {
+                    $query->where('rating', '>=', 7.5);
+                } elseif (in_array($genreLower, ['coming soon', 'upcoming'])) {
+                    $query->where(function ($q) {
+                        $q->whereYear('release_date', '>=', 2026)
+                          ->orWhere('release_date', '>=', '2026-01-01');
+                    });
+                } elseif (in_array($genreLower, ['trending now', 'trending'])) {
+                    // Sorting handled below by views
+                } elseif (in_array($genreLower, ['recently added', 'recently-added'])) {
+                    // Sorting handled below by id desc
+                } elseif (in_array($genreLower, ['top imdb', 'top-imdb', 'imdb top 250'])) {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('genres', 'Top IMDb')
+                          ->orWhere('rating', '>=', 8.0);
+                    });
+                } elseif (in_array($genreLower, ['south indian', 'south indian movies', 'south movies', 'south'])) {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('genres', 'South Indian')
+                          ->orWhereJsonContains('genres', 'South Movies')
+                          ->orWhereJsonContains('languages', 'Tamil')
+                          ->orWhereJsonContains('languages', 'Telugu')
+                          ->orWhereJsonContains('languages', 'Malayalam')
+                          ->orWhereJsonContains('languages', 'Kannada');
+                    });
+                } elseif (in_array($genreLower, ['dual audio', 'dual-audio'])) {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('genres', 'Dual Audio')
+                          ->orWhere('title', 'LIKE', '%Dual Audio%')
+                          ->orWhere('title', 'LIKE', '%Multi Audio%');
+                    });
+                } elseif (in_array($genreLower, ['bollywood', 'hindi'])) {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('genres', 'Bollywood')
+                          ->orWhereJsonContains('genres', 'Hindi Movies')
+                          ->orWhereJsonContains('languages', 'Hindi');
+                    });
+                } elseif (in_array($genreLower, ['hollywood', 'english'])) {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('genres', 'Hollywood')
+                          ->orWhereJsonContains('languages', 'English');
+                    });
+                } elseif (in_array($genreLower, ['k-drama & anime', 'k-drama', 'kdrama', 'anime'])) {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('genres', 'K-Drama')
+                          ->orWhereJsonContains('genres', 'Anime')
+                          ->orWhereJsonContains('genres', 'Korean')
+                          ->orWhereJsonContains('languages', 'Korean')
+                          ->orWhereJsonContains('languages', 'Japanese');
+                    });
+                } else {
+                    $query->whereJsonContains('genres', $genre);
+                }
             }
-        }
 
-        if ($request->filled('platform')) {
-            $platforms = array_filter(array_map('trim', explode(',', $request->query('platform'))));
-            $query->whereIn('ott_platform', $platforms);
-        }
+            // Language Filter
+            if ($request->filled('language')) {
+                $lang = trim($request->query('language'));
+                $langLower = strtolower($lang);
+                if (in_array($langLower, ['bengali', 'bangla'])) {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('languages', 'Bengali')
+                          ->orWhereJsonContains('genres', 'Bangla Cinema')
+                          ->orWhereJsonContains('genres', 'Kolkata Bangla');
+                    });
+                } elseif ($langLower === 'hindi') {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('languages', 'Hindi')
+                          ->orWhereJsonContains('genres', 'Bollywood')
+                          ->orWhereJsonContains('genres', 'Hindi Movies');
+                    });
+                } elseif ($langLower === 'english') {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('languages', 'English')
+                          ->orWhereJsonContains('genres', 'Hollywood');
+                    });
+                } elseif (in_array($langLower, ['south', 'south indian'])) {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('genres', 'South Indian')
+                          ->orWhereJsonContains('languages', 'Tamil')
+                          ->orWhereJsonContains('languages', 'Telugu')
+                          ->orWhereJsonContains('languages', 'Malayalam')
+                          ->orWhereJsonContains('languages', 'Kannada');
+                    });
+                } elseif ($langLower === 'dual audio') {
+                    $query->where(function ($q) {
+                        $q->whereJsonContains('genres', 'Dual Audio')
+                          ->orWhere('title', 'LIKE', '%Dual Audio%');
+                    });
+                } else {
+                    $query->whereJsonContains('languages', $lang);
+                }
+            }
 
-        if ($request->boolean('bangla_ott')) {
-            $query->banglaOtt();
-        }
+            // Quality Filter (e.g. 4K, 1080p)
+            if ($request->filled('quality')) {
+                $quality = trim($request->query('quality'));
+                if (stripos($quality, '4k') !== false) {
+                    $query->where('rating', '>=', 7.5);
+                }
+            }
 
-        if ($request->filled('year')) {
-            $query->whereYear('release_date', $request->query('year'));
-        }
+            if ($request->filled('platform')) {
+                $platforms = array_filter(array_map('trim', explode(',', $request->query('platform'))));
+                $query->whereIn('ott_platform', $platforms);
+            }
 
-        if ($request->boolean('featured')) {
-            $query->featured();
-        }
+            if ($request->boolean('bangla_ott')) {
+                $query->banglaOtt();
+            }
 
-        // Dedicated Hero Slider filter: fetches admin-selected slides, falling back to 2026 trending titles
-        if ($request->boolean('hero_slider')) {
-            $heroMovies = (clone $query)->where('is_hero_slider', true)
-                ->orderBy('hero_order')
-                ->orderByDesc('id')
+            if ($request->filled('year')) {
+                $year = $request->query('year');
+                if ($year === '2010s') {
+                    $query->whereBetween('release_date', ['2010-01-01', '2019-12-31']);
+                } else {
+                    $query->whereYear('release_date', $year);
+                }
+            }
+
+            if ($request->boolean('featured')) {
+                $query->featured();
+            }
+
+            // Dedicated Hero Slider filter
+            if ($request->boolean('hero_slider')) {
+                $heroMovies = (clone $query)->where('is_hero_slider', true)
+                    ->orderBy('hero_order')
+                    ->orderByDesc('id')
+                    ->take(10)
+                    ->get();
+
+                if ($heroMovies->count() < 5) {
+                    $existingIds = $heroMovies->pluck('id')->toArray();
+                    $additional2026 = Movie::published()
+                        ->whereNotIn('id', $existingIds)
+                        ->where(function ($q) {
+                            $q->whereYear('release_date', '>=', 2026)
+                              ->orWhere('release_date', '>=', '2026-01-01');
+                        })
+                        ->whereNotNull('backdrop_url')
+                        ->orderByDesc('rating')
+                        ->take(10 - $heroMovies->count())
+                        ->get();
+                    $heroMovies = $heroMovies->concat($additional2026);
+                }
+
+                return MovieResource::collection($heroMovies);
+            }
+
+            if ($request->filled('search')) {
+                $search = $request->query('search');
+                $query->where('title', 'LIKE', "%{$search}%");
+            }
+
+            $sort = $request->query('sort', 'latest');
+            $genreLower = strtolower($request->query('genre', ''));
+
+            if ($genreLower === 'trending now' || $genreLower === 'trending') {
+                $query->orderByDesc('views');
+            } elseif ($genreLower === 'box office hits' || $genreLower === 'box office') {
+                $query->orderByDesc('views')->orderByDesc('rating');
+            } elseif ($genreLower === 'coming soon' || $genreLower === 'upcoming') {
+                $query->orderBy('release_date');
+            } else {
+                match ($sort) {
+                    'rating' => $query->orderByDesc('rating')->orderByDesc('release_date'),
+                    'popular', 'trending' => $query->orderByDesc('views'),
+                    'oldest' => $query->orderBy('release_date'),
+                    'recent', 'latest' => $query->orderByDesc('id'),
+                    'release' => $query->whereNotNull('release_date')->orderByDesc('release_date')->orderByDesc('id'),
+                    default => $query->orderByDesc('id'),
+                };
+            }
+
+            $perPage = min((int) $request->query('per_page', 24), 60);
+            $movies = $query->paginate($perPage);
+
+            return MovieResource::collection($movies);
+        });
+    }
+
+    /**
+     * Aggregated high-speed catalog payload providing all 16 requested rails in one fast response.
+     */
+    public function catalog()
+    {
+        $cacheKey = 'movies_catalog_all_16_rails_v3';
+
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60, function () {
+            $fields = ['id', 'title', 'slug', 'rating', 'release_date', 'poster_url', 'backdrop_url', 'genres', 'views', 'duration_minutes'];
+
+            // 1. Top 10 Movies To Watch (highest rating >= 7.5, ordered by rating desc)
+            $top10 = Movie::published()
+                ->select($fields)
+                ->where('rating', '>=', 7.5)
+                ->orderByDesc('rating')
+                ->orderByDesc('views')
                 ->take(10)
                 ->get();
 
-            if ($heroMovies->count() < 5) {
-                $existingIds = $heroMovies->pluck('id')->toArray();
-                $additional2026 = Movie::published()
-                    ->whereNotIn('id', $existingIds)
-                    ->where(function ($q) {
-                        $q->whereYear('release_date', '>=', 2026)
-                          ->orWhere('release_date', '>=', '2026-01-01');
+            // 2. Trending Now (highest views)
+            $trending = Movie::published()
+                ->select($fields)
+                ->orderByDesc('views')
+                ->orderByDesc('rating')
+                ->take(18)
+                ->get();
+
+            // 3. Recently Added (latest id)
+            $recentlyAdded = Movie::published()
+                ->select($fields)
+                ->orderByDesc('id')
+                ->take(18)
+                ->get();
+
+            // 4. Box Office Hits (rating >= 7.5 and high views)
+            $boxOffice = Movie::published()
+                ->select($fields)
+                ->where('rating', '>=', 7.5)
+                ->orderByDesc('views')
+                ->take(18)
+                ->get();
+
+            // 5. Coming Soon (2026 releases or upcoming dates)
+            $comingSoon = Movie::published()
+                ->select($fields)
+                ->where(function ($q) {
+                    $q->whereYear('release_date', '>=', 2026)
+                      ->orWhere('release_date', '>=', '2026-01-01');
+                })
+                ->orderBy('release_date')
+                ->take(18)
+                ->get();
+
+            // Helper for genre query
+            $genreQuery = function (array $genres, int $limit = 18) use ($fields) {
+                return Movie::published()
+                    ->select($fields)
+                    ->where(function ($q) use ($genres) {
+                        foreach ($genres as $g) {
+                            $q->orWhereJsonContains('genres', $g);
+                        }
                     })
-                    ->whereNotNull('backdrop_url')
-                    ->orderByDesc('rating')
-                    ->take(10 - $heroMovies->count())
+                    ->orderByDesc('id')
+                    ->take($limit)
                     ->get();
-                $heroMovies = $heroMovies->concat($additional2026);
-            }
+            };
 
-            return MovieResource::collection($heroMovies);
-        }
+            // 6. Action
+            $action = $genreQuery(['Action']);
 
-        if ($request->filled('search')) {
-            $search = $request->query('search');
-            $query->where('title', 'LIKE', "%{$search}%");
-        }
+            // 7. Thriller
+            $thriller = $genreQuery(['Thriller']);
 
-        $sort = $request->query('sort', 'latest');
-        match ($sort) {
-            'rating' => $query->orderByDesc('rating')->orderByDesc('release_date'),
-            'popular' => $query->orderByDesc('views'),
-            'oldest' => $query->orderBy('release_date'),
-            'recent' => $query->orderByDesc('id'),
-            'release' => $query->whereNotNull('release_date')->orderByDesc('release_date')->orderByDesc('id'),
-            default => $query->orderByDesc('id'),
-        };
+            // 8. Comedy
+            $comedy = $genreQuery(['Comedy']);
 
-        $perPage = min((int) $request->query('per_page', 24), 60);
-        $movies = $query->paginate($perPage);
+            // 9. Bangla Cinema
+            $bangla = Movie::published()
+                ->select($fields)
+                ->where(function ($q) {
+                    $q->whereJsonContains('genres', 'Bangla Cinema')
+                      ->orWhereJsonContains('genres', 'Kolkata Bangla')
+                      ->orWhereJsonContains('genres', 'Bangla')
+                      ->orWhereJsonContains('languages', 'Bengali')
+                      ->orWhere('title', 'LIKE', '%Bangla%');
+                })
+                ->orderByDesc('id')
+                ->take(18)
+                ->get();
 
-        return MovieResource::collection($movies);
-    });
-}
+            // 10. Sci-Fi & Fantasy
+            $scifiFantasy = $genreQuery(['Science Fiction', 'Fantasy', 'Sci-Fi', 'Sci-Fi & Fantasy']);
+
+            // 11. Horror
+            $horror = $genreQuery(['Horror']);
+
+            // 12. Crime & Mystery
+            $crimeMystery = $genreQuery(['Crime', 'Mystery', 'Crime & Mystery']);
+
+            // 13. Romance
+            $romance = $genreQuery(['Romance']);
+
+            // 14. Drama
+            $drama = $genreQuery(['Drama']);
+
+            // 15. Adventure
+            $adventure = $genreQuery(['Adventure']);
+
+            // 16. Animation
+            $animation = $genreQuery(['Animation']);
+
+            return [
+                'top_10' => MovieResource::collection($top10)->resolve(),
+                'trending' => MovieResource::collection($trending)->resolve(),
+                'recently_added' => MovieResource::collection($recentlyAdded)->resolve(),
+                'box_office' => MovieResource::collection($boxOffice)->resolve(),
+                'coming_soon' => MovieResource::collection($comingSoon)->resolve(),
+                'action' => MovieResource::collection($action)->resolve(),
+                'thriller' => MovieResource::collection($thriller)->resolve(),
+                'comedy' => MovieResource::collection($comedy)->resolve(),
+                'bangla' => MovieResource::collection($bangla)->resolve(),
+                'scifi_fantasy' => MovieResource::collection($scifiFantasy)->resolve(),
+                'horror' => MovieResource::collection($horror)->resolve(),
+                'crime_mystery' => MovieResource::collection($crimeMystery)->resolve(),
+                'romance' => MovieResource::collection($romance)->resolve(),
+                'drama' => MovieResource::collection($drama)->resolve(),
+                'adventure' => MovieResource::collection($adventure)->resolve(),
+                'animation' => MovieResource::collection($animation)->resolve(),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ]);
+    }
 
     /**
      * Single movie details with all stream servers and related movies.

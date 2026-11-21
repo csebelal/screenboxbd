@@ -114,7 +114,7 @@ const VISUAL_GENRES = [
   },
   {
     name: "Sci-Fi & Fantasy",
-    href: "/movies?genre=Sci-Fi",
+    href: "/movies?genre=Sci-Fi+%26+Fantasy",
     icon: Rocket,
     bgGradient: "from-purple-950/80 via-violet-950/40 to-black/90",
     glowColor: "text-purple-400 group-hover:text-purple-300",
@@ -130,7 +130,7 @@ const VISUAL_GENRES = [
   },
   {
     name: "Crime & Mystery",
-    href: "/movies?genre=Crime",
+    href: "/movies?genre=Crime+%26+Mystery",
     icon: Search,
     bgGradient: "from-slate-900/90 via-zinc-900/60 to-black/90",
     glowColor: "text-emerald-400 group-hover:text-emerald-300",

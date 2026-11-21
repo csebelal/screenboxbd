@@ -58,6 +58,8 @@ export interface ChannelFilterParams {
 
 export interface MovieFilterParams {
   genre?: string;
+  language?: string;
+  quality?: string;
   platform?: string;
   bangla_ott?: boolean;
   year?: string | number;
@@ -250,6 +252,8 @@ export async function getMovies(
   try {
     const query = new URLSearchParams();
     if (params.genre) query.append("genre", params.genre);
+    if (params.language) query.append("language", params.language);
+    if (params.quality) query.append("quality", params.quality);
     if (params.platform) query.append("platform", params.platform);
     if (params.bangla_ott) query.append("bangla_ott", "1");
     if (params.year) query.append("year", String(params.year));
@@ -328,6 +332,53 @@ export async function getMovies(
       to: filtered.length,
     },
   };
+}
+
+export interface MovieCatalogData {
+  top_10: Movie[];
+  trending: Movie[];
+  recently_added: Movie[];
+  box_office: Movie[];
+  coming_soon: Movie[];
+  action: Movie[];
+  thriller: Movie[];
+  comedy: Movie[];
+  bangla: Movie[];
+  scifi_fantasy: Movie[];
+  horror: Movie[];
+  crime_mystery: Movie[];
+  romance: Movie[];
+  drama: Movie[];
+  adventure: Movie[];
+  animation: Movie[];
+}
+
+/**
+ * Fetch full 16-category catalog payload for /movies in a single high-speed request
+ */
+export async function getMoviesCatalog(): Promise<MovieCatalogData | null> {
+  const cacheKey = "movies_catalog_all_16_rails";
+  const cached = getCached<MovieCatalogData>(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/movies?catalog=true`, {
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(TIMEOUT_DETAIL_MS),
+    });
+
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && json.data) {
+        setCached(cacheKey, json.data, 30000);
+        return json.data as MovieCatalogData;
+      }
+    }
+  } catch {
+    // Timeout or fallback
+  }
+
+  return null;
 }
 
 /**

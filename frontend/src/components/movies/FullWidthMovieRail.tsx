@@ -12,6 +12,7 @@ interface FullWidthMovieRailProps {
   movies: Movie[];
   variant?: "portrait" | "top10" | "landscape";
   viewAllLink?: string;
+  badge?: string;
 }
 
 export default function FullWidthMovieRail({
@@ -20,6 +21,7 @@ export default function FullWidthMovieRail({
   movies,
   variant = "portrait",
   viewAllLink = "/movies",
+  badge,
 }: FullWidthMovieRailProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [bookmarkedIds, setBookmarkedIds] = useState<Record<number, boolean>>({});
@@ -46,11 +48,15 @@ export default function FullWidthMovieRail({
         <div>
           <h2 className="text-lg sm:text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-2">
             <span>{title}</span>
-            {variant === "top10" && (
+            {badge ? (
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-red-600/20 text-red-400 border border-red-500/30 uppercase tracking-wider">
+                {badge}
+              </span>
+            ) : variant === "top10" ? (
               <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-red-600/20 text-red-400 border border-red-500/30 uppercase tracking-wider">
                 Trending
               </span>
-            )}
+            ) : null}
           </h2>
           {subtitle && (
             <p className="text-xs text-[#9EA3B0] mt-0.5 font-medium">{subtitle}</p>
