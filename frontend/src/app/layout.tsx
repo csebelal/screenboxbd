@@ -29,50 +29,10 @@ export default async function RootLayout({
 }>) {
   const settings = await getPlatformSettings();
   const enableSubscriptions = Boolean(settings?.enable_subscriptions);
-  const isAnalyticsEnabled = settings?.google_analytics_enabled !== false;
-  const gtmId = (settings?.google_tag_manager_id || "GTM-T4M9PSPK").trim();
-  const gaId = (settings?.google_analytics_id || "").trim();
-  const customHeader = (settings?.custom_header_scripts || "").trim();
 
   return (
     <html lang="en" className="dark">
-      <head>
-        {/* Google tag (gtag.js) - Immediately after <head> */}
-        {isAnalyticsEnabled && gtmId && (
-          <>
-            <script
-              async
-              src={`https://www.googletagmanager.com/gtm.js?id=${gtmId}`}
-            />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());${gaId ? `\ngtag('config', '${gaId}');` : ""}`,
-              }}
-            />
-          </>
-        )}
-      </head>
       <body className="min-h-screen bg-[#0B0C0E] text-white flex flex-col selection:bg-[#E50000] selection:text-white font-sans antialiased overflow-x-hidden">
-        {/* Custom Header tracking if present */}
-        {isAnalyticsEnabled && customHeader && (
-          <div
-            id="custom-header-scripts-container"
-            style={{ display: "none" }}
-            dangerouslySetInnerHTML={{ __html: customHeader }}
-          />
-        )}
-        {/* Google Tag Manager (noscript) */}
-        {isAnalyticsEnabled && gtmId && (
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
-              height="0"
-              width="0"
-              style={{ display: "none", visibility: "hidden" }}
-              title="Google Tag Manager"
-            />
-          </noscript>
-        )}
         <GoogleAnalytics settings={settings} />
         <AnnouncementRibbon />
         <Navbar enableSubscriptions={enableSubscriptions} />
