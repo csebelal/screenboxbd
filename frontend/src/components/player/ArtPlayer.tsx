@@ -48,7 +48,7 @@ export default function ArtPlayer({
       autoplay: true,
       pip: true,
       autoSize: false,
-      autoMini: true,
+      autoMini: false,
       screenshot: false,
       setting: true,
       loop: false,
