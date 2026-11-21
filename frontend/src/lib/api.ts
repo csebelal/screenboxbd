@@ -357,7 +357,7 @@ export interface MovieCatalogData {
  * Fetch full 16-category catalog payload for /movies in a single high-speed request
  */
 export async function getMoviesCatalog(): Promise<MovieCatalogData | null> {
-  const cacheKey = "movies_catalog_all_16_rails";
+  const cacheKey = "movies_catalog_all_16_rails_v4";
   const cached = getCached<MovieCatalogData>(cacheKey);
   if (cached) return cached;
 

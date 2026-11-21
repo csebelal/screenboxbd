@@ -1,4 +1,4 @@
-import { getMovies, getMoviesCatalog, MovieCatalogData } from "@/lib/api";
+import { getMovies, getMoviesCatalog, getSeries, MovieCatalogData } from "@/lib/api";
 import MoviesCategoryHub from "@/components/movies/MoviesCategoryHub";
 import FullWidthMovieRail from "@/components/movies/FullWidthMovieRail";
 import CategoryCollageSection from "@/components/home/CategoryCollageSection";
@@ -7,17 +7,20 @@ import Link from "next/link";
 import { Film, X, Filter } from "lucide-react";
 import { Movie } from "@/types";
 
-export const revalidate = 30;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 interface MoviesPageProps {
   searchParams: Promise<{
     search?: string;
     genre?: string;
     language?: string;
+    lang?: string;
     quality?: string;
     year?: string;
     sort?: "latest" | "rating" | "popular" | "oldest";
     tab?: "movies" | "shows" | "bangla_ott";
+    type?: string;
     page?: string;
   }>;
 }
@@ -26,11 +29,11 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
   const params = await searchParams;
   const currentGenre = params.genre || "";
   const currentSearch = params.search || "";
-  const currentLanguage = params.language || "";
+  const currentLanguage = params.language || params.lang || "";
   const currentQuality = params.quality || "";
   const currentYear = params.year || "";
   const currentSort = params.sort || "";
-  const activeTab = params.tab || "movies";
+  const activeTab = params.tab || (params.type === "Series" || params.type === "TV Shows" ? "shows" : "movies");
 
   const hasActiveFilter = Boolean(
     currentSearch ||
@@ -47,19 +50,51 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
   let catalog: MovieCatalogData | null = null;
 
   if (hasActiveFilter) {
-    // When a filter is selected, fetch filtered results
-    const isBanglaOtt = activeTab === "bangla_ott" || currentGenre.toLowerCase().includes("bangla");
-    const moviesRes = await getMovies({
-      search: currentSearch || undefined,
-      genre: currentGenre || undefined,
-      language: currentLanguage || undefined,
-      quality: currentQuality || undefined,
-      year: currentYear || undefined,
-      sort: (currentSort as "latest" | "rating" | "popular" | "oldest") || "popular",
-      bangla_ott: isBanglaOtt || undefined,
-      per_page: 36,
-    });
-    filteredMovies = moviesRes?.data || [];
+    if (activeTab === "shows") {
+      const seriesRes = await getSeries({
+        search: currentSearch || undefined,
+        genre: currentGenre || undefined,
+        per_page: 48,
+      });
+      // Map series to Movie format for uniform grid display
+      filteredMovies = (seriesRes?.data || []).map((s) => ({
+        id: s.id,
+        tmdb_id: s.tmdb_id,
+        imdb_id: s.imdb_id,
+        title: s.title,
+        slug: s.slug,
+        ott_platform: s.ott_platform,
+        overview: s.overview,
+        poster_url: s.poster_url,
+        backdrop_url: s.backdrop_url,
+        release_date: s.first_air_date,
+        release_year: s.first_air_date ? parseInt(s.first_air_date.substring(0, 4)) : 2024,
+        duration_minutes: 45,
+        rating: s.rating,
+        genres: s.genres,
+        cast: s.cast,
+        languages: s.languages,
+        is_published: true,
+        is_featured: Boolean(s.is_featured),
+        views: s.views || 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })) as unknown as Movie[];
+    } else {
+      // When a movie filter is selected, fetch filtered results
+      const isBanglaOtt = activeTab === "bangla_ott";
+      const moviesRes = await getMovies({
+        search: currentSearch || undefined,
+        genre: currentGenre || undefined,
+        language: currentLanguage || undefined,
+        quality: currentQuality || undefined,
+        year: currentYear || undefined,
+        sort: (currentSort as "latest" | "rating" | "popular" | "oldest") || "popular",
+        bangla_ott: isBanglaOtt || undefined,
+        per_page: 48,
+      });
+      filteredMovies = moviesRes?.data || [];
+    }
   } else {
     // When on default catalog view, fetch all 16 rails in single high-speed call
     catalog = await getMoviesCatalog();

@@ -183,8 +183,8 @@ export default function MoviesCategoryHub({
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const selectedGenre = searchParams.get("genre") || "All";
-  const selectedLang = searchParams.get("lang") || "All";
-  const selectedType = searchParams.get("type") || (activeTab === "shows" ? "Series" : "All");
+  const selectedLang = searchParams.get("language") || searchParams.get("lang") || "All";
+  const selectedType = searchParams.get("tab") === "shows" ? "Web Series" : (searchParams.get("tab") === "movies" ? "Movies" : "All");
   const selectedQuality = searchParams.get("quality") || "All";
   const selectedYear = searchParams.get("year") || "All";
 
@@ -199,6 +199,12 @@ export default function MoviesCategoryHub({
 
   const applyFilter = (param: string, value: string) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()));
+    if (param === "language") {
+      current.delete("lang");
+    }
+    if (param === "tab") {
+      current.delete("type");
+    }
     if (value === "All") {
       current.delete(param);
     } else {
@@ -313,18 +319,36 @@ export default function MoviesCategoryHub({
             <ChevronDown className="w-3 h-3 text-[#73798B]" />
           </button>
           {openDropdown === "genre" && (
-            <div className="absolute top-full left-0 mt-1.5 w-48 max-h-56 overflow-y-auto rounded-xl bg-[#141622] border border-white/[0.1] shadow-2xl p-1 z-30">
-              {["All", "Top IMDb", "Action", "Thriller", "Comedy", "Sci-Fi", "Horror", "Crime", "Romance", "Drama", "Animation"].map(
-                (g) => (
-                  <button
-                    key={g}
-                    onClick={() => applyFilter("genre", g)}
-                    className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-[#B8BED0] hover:text-white hover:bg-white/[0.08] transition"
-                  >
-                    {g}
-                  </button>
-                )
-              )}
+            <div className="absolute top-full left-0 mt-1.5 w-52 max-h-60 overflow-y-auto rounded-xl bg-[#141622] border border-white/[0.1] shadow-2xl p-1 z-30">
+              {[
+                "All",
+                "Top IMDb",
+                "Trending Now",
+                "Box Office Hits",
+                "Coming Soon",
+                "Bangla",
+                "Action",
+                "Thriller",
+                "Comedy",
+                "Sci-Fi & Fantasy",
+                "Horror",
+                "Crime & Mystery",
+                "Romance",
+                "Drama",
+                "Adventure",
+                "Animation",
+                "South Indian",
+                "Bollywood",
+                "Hollywood",
+              ].map((g) => (
+                <button
+                  key={g}
+                  onClick={() => applyFilter("genre", g)}
+                  className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-[#B8BED0] hover:text-white hover:bg-white/[0.08] transition"
+                >
+                  {g}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -333,19 +357,19 @@ export default function MoviesCategoryHub({
         <div className="relative">
           <button
             type="button"
-            onClick={() => setOpenDropdown(openDropdown === "lang" ? null : "lang")}
+            onClick={() => setOpenDropdown(openDropdown === "language" ? null : "language")}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium text-[#C0C5D2] bg-[#12141D]/90 border border-white/[0.08] hover:border-white/[0.15] hover:text-white transition cursor-pointer"
           >
             <Globe className="w-3.5 h-3.5 text-[#73798B]" />
             <span>Language: {selectedLang}</span>
             <ChevronDown className="w-3 h-3 text-[#73798B]" />
           </button>
-          {openDropdown === "lang" && (
+          {openDropdown === "language" && (
             <div className="absolute top-full left-0 mt-1.5 w-44 rounded-xl bg-[#141622] border border-white/[0.1] shadow-2xl p-1 z-30">
-              {["All", "Bangla", "Hindi", "English", "Tamil/Telugu", "Korean"].map((l) => (
+              {["All", "Bangla", "Hindi", "English", "Tamil/Telugu", "Korean", "Dual Audio"].map((l) => (
                 <button
                   key={l}
-                  onClick={() => applyFilter("lang", l)}
+                  onClick={() => applyFilter("language", l)}
                   className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-[#B8BED0] hover:text-white hover:bg-white/[0.08] transition"
                 >
                   {l}
@@ -368,10 +392,14 @@ export default function MoviesCategoryHub({
           </button>
           {openDropdown === "type" && (
             <div className="absolute top-full left-0 mt-1.5 w-40 rounded-xl bg-[#141622] border border-white/[0.1] shadow-2xl p-1 z-30">
-              {["All", "Movies", "Series", "TV Shows"].map((t) => (
+              {["All", "Movies", "Web Series"].map((t) => (
                 <button
                   key={t}
-                  onClick={() => applyFilter("type", t)}
+                  onClick={() => {
+                    if (t === "All") applyFilter("tab", "All");
+                    else if (t === "Web Series") applyFilter("tab", "shows");
+                    else applyFilter("tab", "movies");
+                  }}
                   className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-[#B8BED0] hover:text-white hover:bg-white/[0.08] transition"
                 >
                   {t}
@@ -394,7 +422,7 @@ export default function MoviesCategoryHub({
           </button>
           {openDropdown === "quality" && (
             <div className="absolute top-full left-0 mt-1.5 w-40 rounded-xl bg-[#141622] border border-white/[0.1] shadow-2xl p-1 z-30">
-              {["All", "4K Ultra HD", "1080p FHD", "720p HD", "HDCAM"].map((q) => (
+              {["All", "4K Ultra HD", "1080p FHD", "720p HD"].map((q) => (
                 <button
                   key={q}
                   onClick={() => applyFilter("quality", q)}
@@ -420,7 +448,7 @@ export default function MoviesCategoryHub({
           </button>
           {openDropdown === "year" && (
             <div className="absolute top-full left-0 mt-1.5 w-40 max-h-56 overflow-y-auto rounded-xl bg-[#141622] border border-white/[0.1] shadow-2xl p-1 z-30">
-              {["All", "2026", "2025", "2024", "2023", "2022", "2021", "2020"].map((y) => (
+              {["All", "2026", "2025", "2024", "2023", "2022", "2021", "2020", "2010s"].map((y) => (
                 <button
                   key={y}
                   onClick={() => applyFilter("year", y)}
