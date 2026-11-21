@@ -34,8 +34,16 @@ interface MoviesCategoryHubProps {
   activeTab?: string;
 }
 
-// 7 Popular Collections
+// Popular Collections
 const POPULAR_COLLECTIONS = [
+  {
+    name: "Top IMDb",
+    href: "/movies?genre=Top+IMDb",
+    icon: Star,
+    badge: "TOP 250",
+    badgeColor: "bg-amber-500/20 text-amber-300 border border-amber-500/30",
+    isSpecial: true,
+  },
   {
     name: "South Indian (Hindi Dubbed)",
     href: "/movies?genre=South+Indian",
@@ -306,7 +314,7 @@ export default function MoviesCategoryHub({
           </button>
           {openDropdown === "genre" && (
             <div className="absolute top-full left-0 mt-1.5 w-48 max-h-56 overflow-y-auto rounded-xl bg-[#141622] border border-white/[0.1] shadow-2xl p-1 z-30">
-              {["All", "Action", "Thriller", "Comedy", "Sci-Fi", "Horror", "Crime", "Romance", "Drama", "Animation"].map(
+              {["All", "Top IMDb", "Action", "Thriller", "Comedy", "Sci-Fi", "Horror", "Crime", "Romance", "Drama", "Animation"].map(
                 (g) => (
                   <button
                     key={g}

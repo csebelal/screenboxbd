@@ -90,7 +90,7 @@ class MovieController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->query('search');
-            $query->where('title', 'ILIKE', "%{$search}%");
+            $query->where('title', 'LIKE', "%{$search}%");
         }
 
         $sort = $request->query('sort', 'latest');
